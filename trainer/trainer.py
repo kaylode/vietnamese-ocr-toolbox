@@ -21,7 +21,6 @@ class Trainer(BaseTrainer):
     def __init__(self, config, model, criterion, train_loader, weights_init=None):
         super(Trainer, self).__init__(config, model, criterion, weights_init)
         self.show_images_interval = self.config['trainer']['show_images_interval']
-        self.test_path = self.config['data_loader']['args']['dataset']['val_data_path']
         self.train_loader = train_loader
         self.train_loader_len = len(train_loader)
         if self.config['lr_scheduler']['type'] == 'PolynomialLR':
@@ -163,30 +162,9 @@ class Trainer(BaseTrainer):
         self.logger.info('[{}/{}], train_loss: {:.4f}, time: {:.4f}, lr: {}'.format(
             self.epoch_result['epoch'], self.epochs, self.epoch_result['train_loss'], self.epoch_result['time'],
             self.epoch_result['lr']))
-        net_save_path = '{}/PANNet_latest.pth'.format(self.checkpoint_dir)
-
+        if self.epoch_result['epoch'] % 5 == 0:
+            net_save_path = f"{self.checkpoint_dir}/PANNet_{self.epoch_result['epoch']}.pth"
         save_best = False
-        if self.config['trainer']['metrics'] == 'hmean':  # 使用f1作为最优模型指标
-            recall, precision, hmean = self._eval()
-
-            if self.tensorboard_enable:
-                self.writer.add_scalar('EVAL/recall', recall, self.global_step)
-                self.writer.add_scalar('EVAL/precision', precision, self.global_step)
-                self.writer.add_scalar('EVAL/hmean', hmean, self.global_step)
-            self.logger.info('test: recall: {:.6f}, precision: {:.6f}, f1: {:.6f}'.format(recall, precision, hmean))
-
-            if hmean > self.metrics['hmean']:
-                save_best = True
-                self.metrics['train_loss'] = self.epoch_result['train_loss']
-                self.metrics['hmean'] = hmean
-                self.metrics['precision'] = precision
-                self.metrics['recall'] = recall
-                self.metrics['best_model'] = net_save_path
-        else:
-            if self.epoch_result['train_loss'] < self.metrics['train_loss']:
-                save_best = True
-                self.metrics['train_loss'] = self.epoch_result['train_loss']
-                self.metrics['best_model'] = net_save_path
         self._save_checkpoint(self.epoch_result['epoch'], net_save_path, save_best)
 
     def _on_train_finish(self):
