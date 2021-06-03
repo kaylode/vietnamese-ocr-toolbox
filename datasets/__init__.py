@@ -6,7 +6,7 @@ from torch.utils.data import DataLoader
 from torchvision import transforms
 import copy
 import pathlib
-from . import dataset
+from . import dataset 
 
 
 def get_dataloader(module_name, module_args):
@@ -14,7 +14,7 @@ def get_dataloader(module_name, module_args):
     dataset_args = module_args['dataset']
     dataloader_args = module_args['loader']
 
-    trainset = ImageDataset(
+    trainset = dataset.ImageDataset(
         images_dir=dataset_args['train_imgs'],
         ann_path=dataset_args['train_anns'],
         input_size=dataset_args['input_size'],
