@@ -9,26 +9,23 @@ import pathlib
 from . import dataset 
 
 
-def get_dataloader(module_name, module_args):
-
-    dataset_args = module_args['dataset']
-    dataloader_args = module_args['loader']
+def get_dataloader(config):
 
     trainset = dataset.ImageDataset(
-        images_dir=dataset_args['train_imgs'],
-        ann_path=dataset_args['train_anns'],
-        input_size=dataset_args['input_size'],
-        img_channel=dataset_args['img_channel'],
-        shrink_ratio=dataset_args['shrink_ratio'],
+        images_dir=config.train_imgs,
+        ann_path=config.train_anns,
+        input_size=config.image_size,
+        img_channel=3,
+        shrink_ratio=0.5,
         transform=transforms.ToTensor()
     )
 
     trainloader = DataLoader(
         dataset=trainset, 
-        batch_size=dataloader_args["batch_size"], 
-        shuffle=dataloader_args["shuffle"], 
-        num_workers=dataloader_args["num_workers"],
-        pin_memory=dataloader_args["pin_memory"])
+        batch_size=config.batch_size, 
+        shuffle=True, 
+        num_workers=2,
+        pin_memory=True)
 
     trainloader.dataset_len = len(trainset)
 

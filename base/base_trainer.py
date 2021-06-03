@@ -13,15 +13,11 @@ from utils import setup_logger
 
 
 class BaseTrainer:
-    def __init__(self, config, model, criterion, weights_init):
-        config['trainer']['output_dir'] = os.path.join(str(pathlib.Path(os.path.abspath(__name__)).parent),
-                                                       config['trainer']['output_dir'])
-        config['name'] = config['name'] + '_' + model.name
-        self.save_dir = os.path.join(config['trainer']['output_dir'], config['name'])
+    def __init__(self, args, config, model, criterion, weights_init):
+
+        self.save_dir = os.path.join(args.saved_path, datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
         self.checkpoint_dir = os.path.join(self.save_dir, 'checkpoint')
 
-        if config['trainer']['resume_checkpoint'] == '' and config['trainer']['finetune_checkpoint'] == '':
-            shutil.rmtree(self.save_dir, ignore_errors=True)
         if not os.path.exists(self.checkpoint_dir):
             os.makedirs(self.checkpoint_dir)
 
@@ -32,27 +28,29 @@ class BaseTrainer:
         self.model = model
         self.criterion = criterion
         # logger and tensorboard
-        self.tensorboard_enable = self.config['trainer']['tensorboard']
-        self.epochs = self.config['trainer']['epochs']
-        self.display_interval = self.config['trainer']['display_interval']
-        if self.tensorboard_enable:
-            from torch.utils.tensorboard import SummaryWriter
-            self.writer = SummaryWriter(self.save_dir)
+        
+        self.epochs = self.config.num_epochs
+        self.display_interval = args.print_per_iter
+        
+        from torch.utils.tensorboard import SummaryWriter
+        self.writer = SummaryWriter(self.save_dir)
 
         self.logger = setup_logger(os.path.join(self.save_dir, 'train_log'))
         self.logger.info(pformat(self.config))
 
         # device
-        torch.manual_seed(self.config['trainer']['seed'])  # 为CPU设置随机种子
-        if len(self.config['trainer']['gpus']) > 0 and torch.cuda.is_available():
+        torch.manual_seed(2000)  # 为CPU设置随机种子
+        gpu_devices = config.gpu_devices.split(',')
+        num_gpus = len(gpu_devices)
+        if num_gpus > 0 and torch.cuda.is_available():
             self.with_cuda = True
             torch.backends.cudnn.benchmark = True
             self.logger.info(
-                'train with gpu {} and pytorch {}'.format(self.config['trainer']['gpus'], torch.__version__))
-            self.gpus = {i: item for i, item in enumerate(self.config['trainer']['gpus'])}
+                'train with gpu {} and pytorch {}'.format(self.config.gpu_devices, torch.__version__))
+            self.gpus = {i: item for i, item in enumerate(gpu_devices)}
             self.device = torch.device("cuda:0")
-            torch.cuda.manual_seed(self.config['trainer']['seed'])  # 为当前GPU设置随机种子
-            torch.cuda.manual_seed_all(self.config['trainer']['seed'])  # 为所有GPU设置随机种子
+            torch.cuda.manual_seed(2000)  # 为当前GPU设置随机种子
+            torch.cuda.manual_seed_all(2000)  # 为所有GPU设置随机种子
         else:
             self.with_cuda = False
             self.logger.info('train with cpu and pytorch {}'.format(torch.__version__))
@@ -60,17 +58,29 @@ class BaseTrainer:
         self.logger.info('device {}'.format(self.device))
         self.metrics = {'recall': 0, 'precision': 0, 'hmean': 0, 'train_loss': float('inf'), 'best_model': ''}
 
-        self.optimizer = self._initialize('optimizer', torch.optim, model.parameters())
+        self.optimizer = torch.optim.Adam(
+            self.model.parameters(),
+            lr=config.lr_policy["lr"],
+            momentum=config.lr_policy["momentum"],
+            weight_decay=config.lr_policy["weight_decay"]
+        )
 
-        if self.config['trainer']['resume_checkpoint'] != '':
-            self._laod_checkpoint(self.config['trainer']['resume_checkpoint'], resume=True)
-        elif self.config['trainer']['finetune_checkpoint'] != '':
-            self._laod_checkpoint(self.config['trainer']['finetune_checkpoint'], resume=False)
+        if args.resume:
+            self._load_checkpoint(args.resume, resume=True)
+        elif config.pretrained:
+            self._load_checkpoint(config.pretrained, resume=False)
         else:
             if weights_init is not None:
                 model.apply(weights_init)
-        if self.config['lr_scheduler']['type'] != 'PolynomialLR':
-            self.scheduler = self._initialize('lr_scheduler', torch.optim.lr_scheduler, self.optimizer)
+
+        if args.freeze_backbone:
+            print("freeze model's backbone")
+            self.model.freeze_backbone()
+
+        self.scheduler = torch.optim.lr_scheduler.StepLR(
+                            self.optimizer, 
+                            step_size=config.lr_scheduler['step_size'],
+                            gamma=config.lr_scheduler['gamma'])
 
         # 单机多卡
         num_gpus = torch.cuda.device_count()
@@ -79,18 +89,6 @@ class BaseTrainer:
 
         self.model.to(self.device)
 
-        if self.tensorboard_enable:
-            try:
-                # add graph
-                dummy_input = torch.zeros(1, self.config['data_loader']['args']['dataset']['img_channel'],
-                                          self.config['data_loader']['args']['dataset']['input_size'],
-                                          self.config['data_loader']['args']['dataset']['input_size']).to(self.device)
-                self.writer.add_graph(model, dummy_input)
-            except:
-                import traceback
-                # self.logger.error(traceback.format_exc())
-                self.logger.warn('add graph to tensorboard failed')
-
     def train(self):
         """
         Full training logic
@@ -98,13 +96,11 @@ class BaseTrainer:
         for epoch in range(self.start_epoch, self.epochs + 1):
             try:
                 self.epoch_result = self._train_epoch(epoch)
-                if self.config['lr_scheduler']['type'] != 'PolynomialLR':
-                    self.scheduler.step()
+                self.scheduler.step()
                 self._on_epoch_finish()
             except torch.cuda.CudaError:
                 self._log_memory_usage()
-        if self.tensorboard_enable:
-            self.writer.close()
+        self.writer.close()
         self._on_train_finish()
 
     def _train_epoch(self, epoch):
@@ -172,7 +168,7 @@ class BaseTrainer:
         else:
             self.logger.info("Saving checkpoint: {}".format(filename))
 
-    def _laod_checkpoint(self, checkpoint_path, resume):
+    def _load_checkpoint(self, checkpoint_path, resume):
         """
         Resume from saved checkpoints
         :param checkpoint_path: Checkpoint path to be resumed
@@ -197,9 +193,3 @@ class BaseTrainer:
         else:
             self.logger.info("finetune from checkpoint {}".format(checkpoint_path))
 
-    def _initialize(self, name, module, *args, **kwargs):
-        module_name = self.config[name]['type']
-        module_args = self.config[name]['args']
-        assert all([k not in module_args for k in kwargs]), 'Overwriting kwargs given in config file is not allowed'
-        module_args.update(kwargs)
-        return getattr(module, module_name)(*args, **module_args)

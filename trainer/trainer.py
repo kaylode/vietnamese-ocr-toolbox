@@ -18,14 +18,13 @@ from base import BaseTrainer
 
 
 class Trainer(BaseTrainer):
-    def __init__(self, config, model, criterion, train_loader, weights_init=None):
-        super(Trainer, self).__init__(config, model, criterion, weights_init)
-        self.show_images_interval = self.config['trainer']['show_images_interval']
+    def __init__(self, args, config, model, criterion, train_loader, weights_init=None):
+        super(Trainer, self).__init__(args, config, model, criterion, weights_init)
+        self.show_images_interval = args.val_interval
+        self.save_interval = args.save_interval
         self.train_loader = train_loader
         self.train_loader_len = len(train_loader)
-        if self.config['lr_scheduler']['type'] == 'PolynomialLR':
-            self.scheduler = PolynomialLR(self.optimizer, self.epochs * self.train_loader_len)
-
+        
         self.logger.info('train dataset has {} samples,{} in dataloader'.format(self.train_loader.dataset_len,
                                                                                 self.train_loader_len))
 
@@ -54,8 +53,7 @@ class Trainer(BaseTrainer):
             self.optimizer.zero_grad()
             loss_all.backward()
             self.optimizer.step()
-            if self.config['lr_scheduler']['type'] == 'PolynomialLR':
-                self.scheduler.step()
+
             # acc iou
             score_text = cal_text_score(preds[:, 0, :, :], labels[:, 0, :, :], training_masks, running_metric_text)
             score_kernel = cal_kernel_score(preds[:, 1, :, :], labels[:, 1, :, :], labels[:, 0, :, :], training_masks,
@@ -162,7 +160,7 @@ class Trainer(BaseTrainer):
         self.logger.info('[{}/{}], train_loss: {:.4f}, time: {:.4f}, lr: {}'.format(
             self.epoch_result['epoch'], self.epochs, self.epoch_result['train_loss'], self.epoch_result['time'],
             self.epoch_result['lr']))
-        if self.epoch_result['epoch'] % 5 == 0:
+        if self.epoch_result['epoch'] % self.save_interval == 0:
             net_save_path = f"{self.checkpoint_dir}/PANNet_{self.epoch_result['epoch']}.pth"
         save_best = False
         self._save_checkpoint(self.epoch_result['epoch'], net_save_path, save_best)
