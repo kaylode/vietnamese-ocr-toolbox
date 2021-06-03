@@ -2,6 +2,7 @@
 # @Time    : 2019/8/23 21:52
 # @Author  : zhoujun
 
+import os
 from torch.utils.data import DataLoader
 from torchvision import transforms
 import copy
@@ -12,8 +13,8 @@ from . import dataset
 def get_dataloader(config):
 
     trainset = dataset.ImageDataset(
-        images_dir=config.train_imgs,
-        ann_path=config.train_anns,
+        images_dir=os.path.join('data', config.project_name, config.train_imgs),
+        ann_path=os.path.join('data', config.project_name, config.train_anns),
         input_size=config.image_size,
         img_channel=3,
         shrink_ratio=0.5,

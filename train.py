@@ -11,7 +11,6 @@ from trainer import Trainer
 import argparse
 
 parser = argparse.ArgumentParser('Training EfficientDet')
-parser.add_argument('config' , type=str, help='project file that contains parameters')
 parser.add_argument('--print_per_iter', type=int, default=300, help='Number of iteration to print')
 parser.add_argument('--val_interval', type=int, default=2, help='Number of epoches between valing phases')
 parser.add_argument('--save_interval', type=int, default=1000, help='Number of steps between saving')
@@ -21,7 +20,6 @@ parser.add_argument('--saved_path', type=str, default='./weights')
 parser.add_argument('--freeze_backbone', action='store_true', help='whether to freeze the backbone')
 
 args = parser.parse_args()
-config = Config(os.path.join('configs','config.yaml'))
 
 def main(config):
     os.environ['CUDA_VISIBLE_DEVICES'] = config.gpu_devices
