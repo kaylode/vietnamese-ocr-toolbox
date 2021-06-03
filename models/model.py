@@ -45,6 +45,13 @@ class Model(nn.Module):
         self.segmentation_head = segmentation_head_dict[segmentation_head](backbone_out, **model_config)
         self.name = '{}_{}'.format(backbone, segmentation_head)
 
+    def trainable_parameters(self):
+        return sum(p.numel() for p in self.parameters() if p.requires_grad)
+        
+    def freeze_backbone(self):
+        for param in self.backbone.parameters():
+            param.requires_grad = False
+
     def forward(self, x):
         _, _, H, W = x.size()
         backbone_out = self.backbone(x)
