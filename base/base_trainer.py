@@ -8,7 +8,7 @@ import pathlib
 from pprint import pformat
 import torch
 from torch import nn
-
+from datetime import datetime
 from utils import setup_logger
 
 
@@ -61,7 +61,6 @@ class BaseTrainer:
         self.optimizer = torch.optim.Adam(
             self.model.parameters(),
             lr=config.lr_policy["lr"],
-            momentum=config.lr_policy["momentum"],
             weight_decay=config.lr_policy["weight_decay"]
         )
 
