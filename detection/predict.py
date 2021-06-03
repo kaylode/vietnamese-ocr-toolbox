@@ -4,8 +4,8 @@ import os
 import cv2
 import time
 from models import get_model
-from configs import Config
-from post_processing import decode
+from config import Config
+from post_processing import decode_clip
 import argparse
 
 parser = argparse.ArgumentParser("Inference PAN")
@@ -15,36 +15,41 @@ parser.add_argument('--weight', '-w', type=str, help='Path to trained model')
 args = parser.parse_args()
     
 
-def decode_clip(preds, scale=1, threshold=0.7311, min_area=5):
-    import pyclipper
-    import numpy as np
-    preds[:2, :, :] = torch.sigmoid(preds[:2, :, :])
-    preds = preds.detach().cpu().numpy()
-    text = preds[0] > threshold  # text
-    kernel = (preds[1] > threshold) * text  # kernel
+def expand_box(img, boxes):
+    h,w,c = img.shape
+    new_boxes = np.array(boxes)
+   
+    for i, box in enumerate(new_boxes):
+        x,y,w,h = box
+        if w>h:
+            new_boxes[i, 0] -= new_boxes[:, 3]
+            new_boxes[i, 2] += (2*new_boxes[:, 3])
+        elif w<h:
+            new_boxes[i, 1] -= new_boxes[:, 3]
+            new_boxes[i, 3] += (2*new_boxes[:, 2])
 
-    label_num, label = cv2.connectedComponents(kernel.astype(np.uint8), connectivity=4)
-    bbox_list = []
-    for label_idx in range(1, label_num):
-        points = np.array(np.where(label == label_idx)).transpose((1, 0))[:, ::-1]
-        if points.shape[0] < min_area:
-            continue
-        rect = cv2.minAreaRect(points)
-        poly = cv2.boxPoints(rect).astype(int)
+    return new_boxes
 
-        d_i = cv2.contourArea(poly) * 1.5 / cv2.arcLength(poly, True)
-        pco = pyclipper.PyclipperOffset()
-        pco.AddPath(poly, pyclipper.JT_ROUND, pyclipper.ET_CLOSEDPOLYGON)
-        shrinked_poly = np.array(pco.Execute(d_i))
-        if shrinked_poly.size == 0:
-            continue
-        rect = cv2.minAreaRect(shrinked_poly)
-        shrinked_poly = cv2.boxPoints(rect).astype(int)
-        if cv2.contourArea(shrinked_poly) < 800 / (scale * scale):
-            continue
+def sort_box(boxes):
+    sorted_boxes = sorted(boxes , key=lambda k: [k[1], k[0]])
+    return sorted_boxes
 
-        bbox_list.append([shrinked_poly[1], shrinked_poly[2], shrinked_poly[3], shrinked_poly[0]])
-    return label, np.array(bbox_list)
+def crop_box(img, boxes, image_name, out_folder):
+
+    sorted_boxes = sort_box(boxes)
+    new_boxes = expand_box(img, sorted_boxes)
+    for i, box in enumerate(new_boxes):
+        box_name = os.path.join(out_folder, image_name[:-4] +f"_{i}.jpg")
+        x,y,w,h = box
+        x,y,w,h = int(x), int(y), int(w), int(h)
+        
+        cropped = img[max(0,y):y+h, max(0,x):x+w, :] * 255
+
+        try:
+            cv2.imwrite(box_name, cropped)
+        except:
+            print(box_name, " is missing")
+
 
 
 class PAN:
@@ -87,7 +92,7 @@ if __name__ == '__main__':
     import matplotlib.pyplot as plt
     from utils.util import show_img, draw_bbox
 
-    config = Config(os.path.join('configs','configs.yaml'))
+    config = Config(os.path.join('config','configs.yaml'))
     os.environ['CUDA_VISIBLE_DEVICES'] = config.gpu_devices
     
 
