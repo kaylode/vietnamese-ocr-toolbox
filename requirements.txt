@@ -3,4 +3,5 @@ tensorboard
 pycocotools
 pyclipper
 Polygon3
-colorlog 
+colorlog
+ocrd-fork-pylsd==0.0.3 
