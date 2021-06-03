@@ -4,28 +4,16 @@
         "type": "ImageDataset",
         "args": {
             "dataset": {
-                "train_data_path": [
-                    [
-                        "dataset1.txt1",
-                        "dataset1.txt2"
-                    ],
-                    [
-                        "dataset2.txt1",
-                        "dataset2.txt2"
-                    ]
-                ],
-                "train_data_ratio": [
-                    0.5,
-                    0.5
-                ],
-                "val_data_path": "path/to/test/",
+                "train_imgs": "./data/sroie19/images/train",
+                "val_imgs": "./data/sroie19/images/val",
+                "train_anns": "./data/sroie19/annotations/train.json",
+                "val_anns": "./data/sroie19/annotations/val.json",
                 "input_size": 640,
                 "img_channel": 3,
                 "shrink_ratio": 0.5
             },
             "loader": {
-                "validation_split": 0.1,
-                "train_batch_size": 16,
+                "batch_size": 16,
                 "shuffle": true,
                 "pin_memory": false,
                 "num_workers": 6
