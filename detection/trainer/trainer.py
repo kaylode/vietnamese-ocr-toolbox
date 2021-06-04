@@ -33,6 +33,7 @@ class Trainer(BaseTrainer):
         self.logger.info('val dataset has {} samples,{} in dataloader'.format(self.val_loader.dataset_len,
                                                                                 self.val_loader_len))
 
+        self.logger.info(f"number of trainable parameters: {model.trainable_parameters()}")
 
     def _train_epoch(self, epoch):
         self.model.train()

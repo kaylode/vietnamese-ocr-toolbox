@@ -31,7 +31,8 @@ class BaseTrainer:
         
         self.epochs = self.config.num_epochs
         self.display_interval = args.print_per_iter
-        
+        self.val_interval = args.val_interval
+
         from torch.utils.tensorboard import SummaryWriter
         self.writer = SummaryWriter(self.save_dir)
 
