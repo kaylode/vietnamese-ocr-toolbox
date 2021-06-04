@@ -139,7 +139,7 @@ class Trainer(BaseTrainer):
 
         model = PAN(self.config, state_dict=self.model.state_dict())
         self.metric.update(model)    
-        metric_dict = metric.value()
+        metric_dict = self.metric.value()
         model = None
 
         with torch.no_grad():

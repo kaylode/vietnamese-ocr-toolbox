@@ -32,7 +32,7 @@ def crop_box(img, boxes, image_name, out_folder):
     sorted_boxes = sort_box(boxes)
     # new_boxes = expand_box(img, sorted_boxes)
     for i, box in enumerate(sorted_boxes):
-        box_name = os.path.join(out_folder, image_name[:-4] +f"_{i}.jpg")
+        box_name = os.path.join(out_folder, f"{i}.jpg")
         
         (x1,y1),(x2,y2),(x3,y3),(x4,y4) = box
         x1,y1,x2,y2,x3,y3,x4,y4 = int(x1),int(y1),int(x2),int(y2),int(x3),int(y3),int(x4),int(y4)
@@ -90,6 +90,7 @@ class PAN:
 
         image_name = os.path.basename(img_path)
         if crop_region:
+            output_dir = os.path.join(output_dir, image_name[:-4])
             crop_box(ori_img, boxes_list, image_name, output_dir)
         return preds, boxes_list, t
 
