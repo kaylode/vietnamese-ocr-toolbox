@@ -28,9 +28,6 @@ import numpy as np
 from tqdm import tqdm
 from pycocotools.coco import COCO
 from pycocotools.cocoeval import COCOeval
-import argparse
-from config import Config
-from predict import PAN
 
 def _eval(coco_gt, image_ids, pred_json_path, **kwargs):
     # load results in COCO evaluation tool
@@ -75,11 +72,10 @@ class mAPScores():
 
     def reset(self):
         self.model = None
-        self.image_ids = []
 
     def update(self, model):
         self.model = model
-        self.model.eval()
+       
 
     def compute(self):
         results = []
@@ -129,32 +125,13 @@ class mAPScores():
         if result:
             stats = _eval(self.coco_gt, self.image_ids, self.filepath)
             return {
-                "MAP" : np.round(float(stats[0]),self.decimals),
-                "MAPsmall" : np.round(float(stats[3]),self.decimals),
-                "MAPmedium" : np.round(float(stats[4]),self.decimals),
-                "MAPlarge" : np.round(float(stats[5]),self.decimals),}
+                "MAP" : np.round(float(stats[0]),4),
+                "MAPsmall" : np.round(float(stats[3]),4),
+                "MAPmedium" : np.round(float(stats[4]),4),
+                "MAPlarge" : np.round(float(stats[5]),4),}
         else:
             return {
                 "MAP" : 0.0,
                 "MAPsmall" : 0.0,
                 "MAPmedium" : 0.0,
                 "MAPlarge" : 0.0,}
-
-
-if __name__ == '__main__':
-
-    parser = argparse.ArgumentParser("Inference PAN")
-    parser.add_argument('--weight', '-w', type=str, help='Path to trained model')
-    args = parser.parse_args()
-
-
-    config = Config("../config/configs.yaml")
-    metric = mAPScores(
-        ann_file= config.val_anns,
-        img_dir=config.val_imgs
-    )
-
-    model = PAN(config, args.weight)
-
-    metric.update(model)    
-    print(metric.value())

@@ -7,9 +7,9 @@ import torch
 import shutil
 import numpy as np
 import argparse
-from tqdm import tqdm
-from metrics import _eval
 from config import Config
+from predict import PAN
+from metrics import mAPScores
 
 parser = argparse.ArgumentParser('Evaluate PAN')
 parser.add_argument('--weight', '-w', type=int, default=10, help='Checkpoint to evaluate')
@@ -19,17 +19,16 @@ args = parser.parse_args()
 torch.backends.cudnn.benchmark = True
 
 
-def main(config, args):
-    
-    pass
-    
-
-
 if __name__ == '__main__':
+
     config = Config("./config/configs.yaml")
-    os.environ['CUDA_VISIBLE_DEVICES'] = config.gpu_devices
+    metric = mAPScores(
+        ann_file= os.path.join('../data', config.project_name, config.val_anns),
+        img_dir=os.path.join('../data', config.project_name, config.val_imgs)
+    )
 
-    main(config, args)
+    model = PAN(config, args.weight)
 
-
+    metric.update(model)    
+    print(metric.value())
     
