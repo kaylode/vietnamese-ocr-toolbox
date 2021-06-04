@@ -28,8 +28,9 @@ import numpy as np
 from tqdm import tqdm
 from pycocotools.coco import COCO
 from pycocotools.cocoeval import COCOeval
-from .metrictemplate import TemplateMetric
-from utils.postprocess import postprocessing
+import argparse
+from config import Config
+from predict import PAN
 
 def _eval(coco_gt, image_ids, pred_json_path, **kwargs):
     # load results in COCO evaluation tool
@@ -138,3 +139,22 @@ class mAPScores():
                 "MAPsmall" : 0.0,
                 "MAPmedium" : 0.0,
                 "MAPlarge" : 0.0,}
+
+
+if __name__ == '__main__':
+
+    parser = argparse.ArgumentParser("Inference PAN")
+    parser.add_argument('--weight', '-w', type=str, help='Path to trained model')
+    args = parser.parse_args()
+
+
+    config = Config("../config/configs.yaml")
+    metric = mAPScores(
+        ann_file= config.val_anns,
+        img_dir=config.val_imgs
+    )
+
+    model = PAN(config, args.weight)
+
+    metric.update(model)    
+    print(metric.value())
