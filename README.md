@@ -10,6 +10,25 @@
 - [MCOCR-2020](https://drive.google.com/file/d/1cyEGMVcEkquduJp3ewGq9Q4SyliX0bfB/view?usp=sharing)
 - [SROIE19](https://drive.google.com/drive/folders/1jdFA0yg8uw15scux8O73qs6c5fr1cUff?usp=sharing)
 
+## Pretrained
+- Pretrained PAN weights on SROIE19: [link](https://drive.google.com/file/d/1NIIGWdGdCD9c2TPqyPoiRao2tR69BXgN/view?usp=sharing)
+
+## Inference
+- Install dependencies
+```pip install -r requirements.txt```
+
+- Download pretrained model above
+- Scan receipt in image:
+```
+cd preprocess
+python scan.py --image=<path to image> --output=<output folder>
+```
+
+- Detect text from extracted image above:
+```
+cd detection
+python predict.py -i=<input filename> -o=<output filename> -w=<model's checkpoint>
+```
 
 ## References
 - https://github.com/WenmuZhou/PAN.pytorch
