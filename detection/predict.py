@@ -116,4 +116,7 @@ if __name__ == '__main__':
     img = draw_bbox(cv2.imread(args.input)[:, :, ::-1], boxes_list)
     show_img(img, color=True)
     plt.axis('off')
-    plt.savefig(args.output,bbox_inches='tight')
+    
+    image_name = os.path.basename(img_path)
+    outpath = os.path.join(args.output, image_name[:-4], "detected.jpg")
+    plt.savefig(outpath,bbox_inches='tight')
