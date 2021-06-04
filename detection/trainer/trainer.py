@@ -87,7 +87,7 @@ class Trainer(BaseTrainer):
                 batch_start = time.time()
 
             if (i + 1) % self.save_interval == 0:
-                net_save_path = f"{self.checkpoint_dir}/PANNet_{epoch}_{i+1}.pth"
+                net_save_path = f"{self.checkpoint_dir}/PANNet_last.pth"
                 self._save_checkpoint(epoch, net_save_path, save_best=False)
             
             # write tensorboard
@@ -162,9 +162,14 @@ class Trainer(BaseTrainer):
         iou_kernel = iou_kernel*1.0 / self.val_loader_len
 
         self.logger.info(
-            '[{}/{}],  acc: {:.4f}, iou_text: {:.4f}, iou_kernel: {:.4f}, loss_all: {:.4f}, time:{:.2f}'.format(
+            '[{}/{}],  val_acc: {:.4f}, val_iou_text: {:.4f}, val_iou_kernel: {:.4f}, val_loss_all: {:.4f}, time:{:.2f}'.format(
                 epoch, self.epochs, acc, iou_text, iou_kernel, loss_all, epoch_end-epoch_start))
         
+        if acc>self.best_acc:
+            self.best_acc=acc
+            net_save_path = f"{self.checkpoint_dir}/PANNet_best.pth"
+            self._save_checkpoint(epoch, net_save_path, save_best=False)
+
         return acc, iou_text, iou_kernel
 
 

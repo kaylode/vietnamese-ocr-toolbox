@@ -14,13 +14,13 @@ from utils import setup_logger
 
 class BaseTrainer:
     def __init__(self, args, config, model, criterion, weights_init):
-
         self.save_dir = os.path.join(args.saved_path, datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
         self.checkpoint_dir = os.path.join(self.save_dir, 'checkpoint')
 
         if not os.path.exists(self.checkpoint_dir):
             os.makedirs(self.checkpoint_dir)
 
+        self.best_acc=0
         self.global_step = 0
         self.start_epoch = 1
         self.config = config
