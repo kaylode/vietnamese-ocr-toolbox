@@ -159,8 +159,8 @@ class BaseTrainer:
             'state_dict': self.model.state_dict(),
             'optimizer': self.optimizer.state_dict(),
             'scheduler': self.scheduler.state_dict(),
-            'config': self.config,
-            'metrics': self.metrics
+            # 'config': self.config,
+            # 'metrics': self.metrics
         }
         
         torch.save(state, file_name)

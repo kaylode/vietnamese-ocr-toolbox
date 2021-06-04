@@ -31,19 +31,24 @@ def expand_box(img, boxes):
     return new_boxes
 
 def sort_box(boxes):
-    sorted_boxes = sorted(boxes , key=lambda k: [k[1], k[0]])
+    sorted_boxes = sorted(boxes , key=lambda k: [k[0][1], k[0][0]])
     return sorted_boxes
 
 def crop_box(img, boxes, image_name, out_folder):
 
     sorted_boxes = sort_box(boxes)
-    new_boxes = expand_box(img, sorted_boxes)
-    for i, box in enumerate(new_boxes):
+    # new_boxes = expand_box(img, sorted_boxes)
+    for i, box in enumerate(sorted_boxes):
         box_name = os.path.join(out_folder, image_name[:-4] +f"_{i}.jpg")
-        x,y,w,h = box
-        x,y,w,h = int(x), int(y), int(w), int(h)
         
-        cropped = img[max(0,y):y+h, max(0,x):x+w, :] * 255
+        (x1,y1),(x2,y2),(x3,y3),(x4,y4) = box
+        x1,y1,x2,y2,x3,y3,x4,y4 = int(x1),int(y1),int(x2),int(y2),int(x3),int(y3),int(x4),int(y4)
+        min_x = min(x1,x2,x3,x4)
+        min_y = min(y1,y2,y3,y4)
+        max_x = max(x1,x2,x3,x4)
+        max_y = max(y1,y2,y3,y4)
+
+        cropped = img[min_y:max_y, min_x:max_x, :]
 
         try:
             cv2.imwrite(box_name, cropped)
@@ -62,13 +67,13 @@ class PAN:
         self.net.to(self.device)
         self.net.eval()
 
-    def predict(self, img: str, short_size: int = 736):
-        img = cv2.imread(img)
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    def predict(self, img_path: str, output_dir:str, short_size: int = 736):
+        img = cv2.imread(img_path)
+        ori_img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
-        h, w = img.shape[:2]
+        h, w = ori_img.shape[:2]
         scale = short_size / min(h, w)
-        img = cv2.resize(img, None, fx=scale, fy=scale)
+        img = cv2.resize(ori_img, None, fx=scale, fy=scale)
 
         tensor = tf.ToTensor()(img)
         tensor = tensor.unsqueeze_(0)
@@ -85,6 +90,9 @@ class PAN:
             if len(boxes_list):
                 boxes_list = boxes_list / scale
             t = time.time() - start
+
+        image_name = os.path.basename(img_path)
+        crop_box(ori_img, boxes_list, image_name, output_dir)
         return preds, boxes_list, t
 
 
@@ -97,7 +105,8 @@ if __name__ == '__main__':
     
 
     model = PAN(config, args.weight)
-    preds, boxes_list, t = model.predict(args.input)
+    preds, boxes_list, t = model.predict(args.input, args.output)
+    
     show_img(preds)
     img = draw_bbox(cv2.imread(args.input)[:, :, ::-1], boxes_list)
     show_img(img, color=True)
