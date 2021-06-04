@@ -86,6 +86,9 @@ class Trainer(BaseTrainer):
                         iou_kernel, loss_all, loss_tex, loss_ker, loss_agg, loss_dis, lr, batch_time))
                 batch_start = time.time()
 
+            if (i + 1) % self.save_interval == 0:
+                net_save_path = f"{self.checkpoint_dir}/PANNet_{epoch}_{i+1}.pth"
+                self._save_checkpoint(epoch, net_save_path, save_best=False)
             
             # write tensorboard
             self.writer.add_scalar('TRAIN/LOSS/loss_all', loss_all, self.global_step)
@@ -97,7 +100,8 @@ class Trainer(BaseTrainer):
             self.writer.add_scalar('TRAIN/ACC_IOU/iou_text', iou_text, self.global_step)
             self.writer.add_scalar('TRAIN/ACC_IOU/iou_kernel', iou_kernel, self.global_step)
             self.writer.add_scalar('TRAIN/lr', lr, self.global_step)
-            if i % self.show_images_interval == 0:
+            
+            if (i + 1) % self.save_interval == 0:
                 # show images on tensorboard
                 self.writer.add_images('TRAIN/imgs', images, self.global_step)
                 # text kernel and training_masks
@@ -128,7 +132,9 @@ class Trainer(BaseTrainer):
         acc = 0.
         iou_text = 0.
         iou_kernel = 0.
-
+        running_metric_text = runningScore(2)
+        running_metric_kernel = runningScore(2)
+        
         epoch_start = time.time()
         with torch.no_grad():
             for i, (images, labels, training_masks) in enumerate(self.val_loader):
