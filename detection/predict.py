@@ -8,13 +8,6 @@ from config import Config
 from post_processing import decode_clip
 import argparse
 
-parser = argparse.ArgumentParser("Inference PAN")
-parser.add_argument('--input', '-i', type=str, help='Path to input image')
-parser.add_argument('--output', '-o', type=str, help='Path to save output image')
-parser.add_argument('--weight', '-w', type=str, help='Path to trained model')
-args = parser.parse_args()
-    
-
 def expand_box(img, boxes):
     h,w,c = img.shape
     new_boxes = np.array(boxes)
@@ -104,6 +97,12 @@ class PAN:
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
     from utils.util import show_img, draw_bbox
+
+    parser = argparse.ArgumentParser("Inference PAN")
+    parser.add_argument('--input', '-i', type=str, help='Path to input image')
+    parser.add_argument('--output', '-o', type=str, help='Path to save output image')
+    parser.add_argument('--weight', '-w', type=str, help='Path to trained model')
+    args = parser.parse_args()
 
     config = Config(os.path.join('config','configs.yaml'))
     os.environ['CUDA_VISIBLE_DEVICES'] = config.gpu_devices

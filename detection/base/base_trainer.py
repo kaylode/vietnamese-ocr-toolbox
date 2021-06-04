@@ -10,7 +10,6 @@ import torch
 from torch import nn
 from datetime import datetime
 from utils import setup_logger
-from predict import PAN
 
 
 class BaseTrainer:

@@ -35,6 +35,7 @@ def main(config):
                       config=config,
                       model=model,
                       criterion=criterion,
+                      metric=metric,
                       train_loader=trainloader,
                       val_loader=valloader)
     trainer.train()

@@ -14,7 +14,7 @@ from torchvision import transforms
 from post_processing import decode
 from utils import PolynomialLR, runningScore, cal_text_score, cal_kernel_score, cal_recall_precison_f1
 from base import BaseTrainer
-
+from predict import PAN
 
 class Trainer(BaseTrainer):
     def __init__(self, args, config, model, criterion, train_loader, val_loader, metric, weights_init=None):
