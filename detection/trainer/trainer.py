@@ -137,7 +137,7 @@ class Trainer(BaseTrainer):
         
         epoch_start = time.time()
         with torch.no_grad():
-            for i, (images, labels, training_masks) in enumerate(self.val_loader):
+            for i, (images, labels, training_masks) in enumerate(tqdm(self.val_loader)):
                 
                 images, labels, training_masks = images.to(self.device), labels.to(self.device), training_masks.to(
                     self.device)
