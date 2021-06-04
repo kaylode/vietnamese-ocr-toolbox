@@ -67,7 +67,7 @@ class PAN:
         self.net.to(self.device)
         self.net.eval()
 
-    def predict(self, img_path: str, output_dir:str, short_size: int = 736):
+    def predict(self, img_path: str, output_dir:str =None, short_size: int = 736, crop_region=False):
         img = cv2.imread(img_path)
         ori_img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
@@ -92,7 +92,8 @@ class PAN:
             t = time.time() - start
 
         image_name = os.path.basename(img_path)
-        crop_box(ori_img, boxes_list, image_name, output_dir)
+        if crop_region:
+            crop_box(ori_img, boxes_list, image_name, output_dir)
         return preds, boxes_list, t
 
 
@@ -105,7 +106,7 @@ if __name__ == '__main__':
     
 
     model = PAN(config, args.weight)
-    preds, boxes_list, t = model.predict(args.input, args.output)
+    preds, boxes_list, t = model.predict(args.input, args.output, crop_region=True)
     
     show_img(preds)
     img = draw_bbox(cv2.imread(args.input)[:, :, ::-1], boxes_list)
