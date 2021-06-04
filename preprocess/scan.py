@@ -254,7 +254,6 @@ class DocScanner(object):
     def scan(self, image_path, output_path):
 
         RESCALED_HEIGHT = 500.0
-        OUTPUT_DIR = output_path
 
         # load the image and compute the ratio of the old height
         # to the new height, clone it, and resize it
@@ -283,8 +282,7 @@ class DocScanner(object):
         thresh = cv2.adaptiveThreshold(sharpen, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 21, 15)
 
         # save the transformed image
-        
-        cv2.imwrite(OUTPUT_DIR + '/' + "preprocessed.jpg", thresh)
+        cv2.imwrite(output_path, thresh)
         
 
 
@@ -303,13 +301,7 @@ if __name__ == "__main__":
 
     # Scan single image specified by command line argument --image <IMAGE_PATH>
     if im_file_path:
-        image_name = os.path.basename(im_file_path)
-        output_path = os.path.join(args.output, image_name[:-4])
-
-        if not os.path.exists(output_path):
-            os.mkdir(output_path)
-
-        scanner.scan(im_file_path, output_path)
+        scanner.scan(im_file_path, args.output)
 
     # Scan all valid images in directory specified by command line argument --images <IMAGE_DIR>
     else:

@@ -6,7 +6,7 @@ import argparse
 
 parser = argparse.ArgumentParser("Inference PAN")
 parser.add_argument('--input', '-i', type=str, help='Path to input image')
-parser.add_argument('--output', '-o', type=str, help='Path to folder to save output txt')
+parser.add_argument('--output', '-o', type=str, help='Path to save output txt')
 parser.add_argument('--weight', '-w', type=str, help='Path to trained model')
 parser.add_argument('--config', '-c', type=str, help='Path to trained model config')
 args = parser.parse_args()
@@ -42,12 +42,7 @@ def main(config, args):
             crop_texts.append(text)
         crop_texts = '||'.join(crop_texts)
         
-        image_name = os.path.basename(args.input)
-        outpath = os.path.join(args.output, image_name, "ocr.txt")
-        if not os.path.exists(outpath):
-            os.mkdir(outpath)
-
-        with open(outpath, 'w+') as f:
+        with open(args.output, 'w+') as f:
             f.write(crop_texts)
 
 if __name__ == '__main__':

@@ -90,7 +90,6 @@ class PAN:
 
         image_name = os.path.basename(img_path)
         if crop_region:
-            output_dir = os.path.join(output_dir, image_name[:-4], "crops")
             crop_box(ori_img, boxes_list, image_name, output_dir)
         return preds, boxes_list, t
 
@@ -117,6 +116,6 @@ if __name__ == '__main__':
     show_img(img, color=True)
     plt.axis('off')
     
-    image_name = os.path.basename(img_path)
-    outpath = os.path.join(args.output, image_name[:-4], "detected.jpg")
+    out_dir = os.path.dirname(args.output)
+    outpath = os.path.join(out_dir, "detected.jpg")
     plt.savefig(outpath,bbox_inches='tight')
