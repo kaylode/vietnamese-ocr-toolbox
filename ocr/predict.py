@@ -43,7 +43,10 @@ def main(config, args):
         crop_texts = '||'.join(crop_texts)
         
         image_name = os.path.basename(args.input)
-        outpath = os.path.join(args.output, image_name)
+        outpath = os.path.join(args.output, image_name, "ocr.txt")
+        if not os.path.exists(outpath):
+            os.mkdir(outpath)
+
         with open(outpath, 'w+') as f:
             f.write(crop_texts)
 

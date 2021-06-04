@@ -283,8 +283,8 @@ class DocScanner(object):
         thresh = cv2.adaptiveThreshold(sharpen, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 21, 15)
 
         # save the transformed image
-        basename = os.path.basename(image_path)
-        cv2.imwrite(OUTPUT_DIR + '/' + basename, thresh)
+        
+        cv2.imwrite(OUTPUT_DIR + '/' + "preprocessed.jpg", thresh)
         
 
 
@@ -293,7 +293,7 @@ if __name__ == "__main__":
     im_dir = args.images
     im_file_path = args.image
 
-    output_path = args.output
+    
 
     scanner = DocScanner()
 
@@ -303,10 +303,19 @@ if __name__ == "__main__":
 
     # Scan single image specified by command line argument --image <IMAGE_PATH>
     if im_file_path:
+        image_name = os.path.basename(im_file_path)
+        output_path = os.path.join(args.output, image_name)
+
+        if not os.path.exists(output_path):
+            os.mkdir(output_path)
+
         scanner.scan(im_file_path, output_path)
 
     # Scan all valid images in directory specified by command line argument --images <IMAGE_DIR>
     else:
         im_files = [f for f in os.listdir(im_dir) if get_ext(f) in valid_formats]
         for im in im_files:
+            output_path = os.path.join(args.output, im)
+            if not os.path.exists(output_path):
+                os.mkdir(output_path)
             scanner.scan(im_dir + '/' + im, output_path)
