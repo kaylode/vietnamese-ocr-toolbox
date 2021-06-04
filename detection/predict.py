@@ -58,12 +58,16 @@ def crop_box(img, boxes, image_name, out_folder):
 
 
 class PAN:
-    def __init__(self, config, model_path):
+    def __init__(self, config, model_path=None, state_dict=None):
         
         self.device = torch.device("cuda")
         self.net = get_model(config.model)
-        checkpoint = torch.load(model_path, map_location=self.device)
-        self.net.load_state_dict(checkpoint['state_dict'])
+        if model_path is not None:
+            checkpoint = torch.load(model_path, map_location=self.device)
+            self.net.load_state_dict(checkpoint['state_dict'])
+        elif state_dict is not None:
+            self.net.load_state_dict(state_dict)
+            
         self.net.to(self.device)
         self.net.eval()
 
@@ -105,7 +109,7 @@ if __name__ == '__main__':
     os.environ['CUDA_VISIBLE_DEVICES'] = config.gpu_devices
     
 
-    model = PAN(config, args.weight)
+    model = PAN(config, model_path=args.weight)
     preds, boxes_list, t = model.predict(args.input, args.output, crop_region=True)
     
     show_img(preds)

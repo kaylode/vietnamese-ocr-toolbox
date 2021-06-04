@@ -13,13 +13,13 @@ import torchvision.utils as vutils
 from torchvision import transforms
 from post_processing import decode
 from utils import PolynomialLR, runningScore, cal_text_score, cal_kernel_score, cal_recall_precison_f1
-
 from base import BaseTrainer
 
 
 class Trainer(BaseTrainer):
-    def __init__(self, args, config, model, criterion, train_loader, val_loader, weights_init=None):
-        super(Trainer, self).__init__(args, config, model, criterion, weights_init)
+    def __init__(self, args, config, model, criterion, train_loader, val_loader, metric, weights_init=None):
+        super(Trainer, self).__init__(args, config, model, criterion, metric, weights_init)
+        
         self.show_images_interval = args.val_interval
         self.save_interval = args.save_interval
         self.train_loader = train_loader
@@ -136,6 +136,12 @@ class Trainer(BaseTrainer):
         running_metric_kernel = runningScore(2)
         
         epoch_start = time.time()
+
+        model = PAN(self.config, state_dict=self.model.state_dict())
+        self.metric.update(model)    
+        metric_dict = metric.value()
+        model = None
+
         with torch.no_grad():
             for i, (images, labels, training_masks) in enumerate(tqdm(self.val_loader)):
                 
@@ -154,6 +160,7 @@ class Trainer(BaseTrainer):
                 acc += score_text['Mean Acc']
                 iou_text += score_text['Mean IoU']
                 iou_kernel += score_kernel['Mean IoU']
+
         epoch_end = time.time()
 
         acc = acc*1.0 / self.val_loader_len
@@ -167,9 +174,13 @@ class Trainer(BaseTrainer):
         
         if acc>self.best_acc:
             self.best_acc=acc
-            net_save_path = f"{self.checkpoint_dir}/PANNet_best.pth"
+            net_save_path = f"{self.checkpoint_dir}/PANNet_best_acc.pth"
             self._save_checkpoint(epoch, net_save_path, save_best=False)
-
+        if metric_dict['MAP'] > self.best_map:
+            self.best_map=metric_dict['MAP']
+            net_save_path = f"{self.checkpoint_dir}/PANNet_best_map.pth"
+            self._save_checkpoint(epoch, net_save_path, save_best=False)
+            
         return acc, iou_text, iou_kernel
 
 

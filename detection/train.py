@@ -6,6 +6,7 @@ from __future__ import print_function
 import os
 from config import Config
 from models import get_model, get_loss
+from metrics import get_metric
 from datasets import get_dataloader
 from trainer import Trainer
 import argparse
@@ -26,7 +27,8 @@ def main(config):
     trainloader, valloader = get_dataloader(config)
 
     criterion = get_loss(config.loss).cuda()
-
+    metric = get_metric(config)
+    
     model = get_model(config.model)
 
     trainer = Trainer(args=args,

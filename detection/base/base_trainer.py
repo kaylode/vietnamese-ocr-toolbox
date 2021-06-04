@@ -10,10 +10,12 @@ import torch
 from torch import nn
 from datetime import datetime
 from utils import setup_logger
+from predict import PAN
 
 
 class BaseTrainer:
-    def __init__(self, args, config, model, criterion, weights_init):
+    def __init__(self, args, config, model, criterion, metric, weights_init):
+        self.config=config
         self.save_dir = os.path.join(args.saved_path, datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
         self.checkpoint_dir = os.path.join(self.save_dir, 'checkpoint')
 
@@ -21,11 +23,13 @@ class BaseTrainer:
             os.makedirs(self.checkpoint_dir)
 
         self.best_acc=0
+        self.best_map = 0
         self.global_step = 0
         self.start_epoch = 1
         self.config = config
 
         self.model = model
+        self.metric = metric
         self.criterion = criterion
         # logger and tensorboard
         

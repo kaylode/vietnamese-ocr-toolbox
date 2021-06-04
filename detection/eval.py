@@ -27,7 +27,7 @@ if __name__ == '__main__':
         img_dir=os.path.join('../data', config.project_name, config.val_imgs)
     )
 
-    model = PAN(config, args.weight)
+    model = PAN(config, model_path=args.weight)
 
     metric.update(model)    
     print(metric.value())
