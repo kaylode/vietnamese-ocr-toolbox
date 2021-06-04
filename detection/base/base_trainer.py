@@ -162,13 +162,12 @@ class BaseTrainer:
             'config': self.config,
             'metrics': self.metrics
         }
-        filename = os.path.join(self.checkpoint_dir, file_name)
-        torch.save(state, filename)
+        
+        torch.save(state, file_name)
         if save_best:
-            shutil.copy(filename, os.path.join(self.checkpoint_dir, 'model_best.pth'))
             self.logger.info("Saving current best: {}".format(file_name))
         else:
-            self.logger.info("Saving checkpoint: {}".format(filename))
+            self.logger.info("Saving checkpoint: {}".format(file_name))
 
     def _load_checkpoint(self, checkpoint_path, resume):
         """
