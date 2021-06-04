@@ -126,7 +126,7 @@ class Trainer(BaseTrainer):
         return {'train_loss': train_loss / self.train_loader_len, 'lr': lr, 'time': time.time() - epoch_start,
                 'epoch': epoch}
 
-    def _eval(self):
+    def _val_epoch(self, epoch):
         self.model.eval()
         val_loss = 0.
         acc = 0.
