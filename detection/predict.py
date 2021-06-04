@@ -90,6 +90,7 @@ class PAN:
 
         image_name = os.path.basename(img_path)
         if crop_region:
+            os.makedirs(output_dir, exist_ok=True)
             crop_box(ori_img, boxes_list, image_name, output_dir)
         return preds, boxes_list, t
 

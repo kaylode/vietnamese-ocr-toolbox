@@ -301,6 +301,8 @@ if __name__ == "__main__":
 
     # Scan single image specified by command line argument --image <IMAGE_PATH>
     if im_file_path:
+        path = os.path.dirname(args.output)
+        os.makedirs(path,exist_ok=True)
         scanner.scan(im_file_path, args.output)
 
     # Scan all valid images in directory specified by command line argument --images <IMAGE_DIR>
