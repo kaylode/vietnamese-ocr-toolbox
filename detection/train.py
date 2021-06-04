@@ -23,7 +23,7 @@ args = parser.parse_args()
 
 def main(config):
     os.environ['CUDA_VISIBLE_DEVICES'] = config.gpu_devices
-    train_loader = get_dataloader(config)
+    trainloader, valloader = get_dataloader(config)
 
     criterion = get_loss(config.loss).cuda()
 
@@ -33,7 +33,8 @@ def main(config):
                       config=config,
                       model=model,
                       criterion=criterion,
-                      train_loader=train_loader)
+                      train_loader=trainloader,
+                      val_loader=valloader)
     trainer.train()
 
 

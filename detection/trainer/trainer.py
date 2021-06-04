@@ -18,15 +18,21 @@ from base import BaseTrainer
 
 
 class Trainer(BaseTrainer):
-    def __init__(self, args, config, model, criterion, train_loader, weights_init=None):
+    def __init__(self, args, config, model, criterion, train_loader, val_loader, weights_init=None):
         super(Trainer, self).__init__(args, config, model, criterion, weights_init)
         self.show_images_interval = args.val_interval
         self.save_interval = args.save_interval
         self.train_loader = train_loader
+        self.val_loader = val_loader
         self.train_loader_len = len(train_loader)
+        self.val_loader_len = len(val_loader)
         
         self.logger.info('train dataset has {} samples,{} in dataloader'.format(self.train_loader.dataset_len,
                                                                                 self.train_loader_len))
+
+        self.logger.info('val dataset has {} samples,{} in dataloader'.format(self.val_loader.dataset_len,
+                                                                                self.val_loader_len))
+
 
     def _train_epoch(self, epoch):
         self.model.train()
@@ -117,44 +123,43 @@ class Trainer(BaseTrainer):
 
     def _eval(self):
         self.model.eval()
-        # torch.cuda.empty_cache()  # speed up evaluating after training finished
-        img_path = os.path.join(self.test_path, 'img')
-        gt_path = os.path.join(self.test_path, 'gt')
-        result_save_path = os.path.join(self.save_dir, 'result')
-        if os.path.exists(result_save_path):
-            shutil.rmtree(result_save_path, ignore_errors=True)
-        if not os.path.exists(result_save_path):
-            os.makedirs(result_save_path)
-        short_size = 736
-        # 预测所有测试图片
-        img_paths = [os.path.join(img_path, x) for x in os.listdir(img_path)]
-        for img_path in tqdm(img_paths, desc='test models'):
-            img_name = os.path.basename(img_path).split('.')[0]
-            save_name = os.path.join(result_save_path, 'res_' + img_name + '.txt')
+        val_loss = 0.
+        acc = 0.
+        iou_text = 0.
+        iou_kernel = 0.
 
-            assert os.path.exists(img_path), 'file is not exists'
-            img = cv2.imread(img_path)
-            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-            h, w = img.shape[:2]
-            scale = short_size / min(h, w)
-            img = cv2.resize(img, None, fx=scale, fy=scale)
-            # 将图片由(w,h)变为(1,img_channel,h,w)
-            tensor = transforms.ToTensor()(img)
-            tensor = tensor.unsqueeze_(0)
+        epoch_start = time.time()
+        with torch.no_grad():
+            for i, (images, labels, training_masks) in enumerate(self.val_loader):
+                
+                images, labels, training_masks = images.to(self.device), labels.to(self.device), training_masks.to(
+                    self.device)
 
-            tensor = tensor.to(self.device)
-            with torch.no_grad():
-                torch.cuda.synchronize(self.device)
-                preds = self.model(tensor)[0]
-                torch.cuda.synchronize(self.device)
-                preds, boxes_list = decode(preds)
-                scale = (preds.shape[1] / w, preds.shape[0] / h)
-                if len(boxes_list):
-                    boxes_list = boxes_list / scale
-            np.savetxt(save_name, boxes_list.reshape(-1, 8), delimiter=',', fmt='%d')
-        # 开始计算 recall precision f1
-        result_dict = cal_recall_precison_f1(gt_path=gt_path, result_path=result_save_path)
-        return result_dict['recall'], result_dict['precision'], result_dict['hmean']
+                preds = self.model(images)
+                loss_all, loss_tex, loss_ker, loss_agg, loss_dis = self.criterion(preds, labels, training_masks)
+            
+                # acc iou
+                score_text = cal_text_score(preds[:, 0, :, :], labels[:, 0, :, :], training_masks, running_metric_text)
+                score_kernel = cal_kernel_score(preds[:, 1, :, :], labels[:, 1, :, :], labels[:, 0, :, :], training_masks,
+                                                running_metric_kernel)
+
+                val_loss += loss_all.item()
+                acc += score_text['Mean Acc']
+                iou_text += score_text['Mean IoU']
+                iou_kernel += score_kernel['Mean IoU']
+        epoch_end = time.time()
+
+        acc = acc*1.0 / self.val_loader_len
+        iou_text = iou_text*1.0 / self.val_loader_len
+        val_loss = val_loss*1.0 / self.val_loader_len
+        iou_kernel = iou_kernel*1.0 / self.val_loader_len
+
+        self.logger.info(
+            '[{}/{}],  acc: {:.4f}, iou_text: {:.4f}, iou_kernel: {:.4f}, loss_all: {:.4f}, time:{:.2f}'.format(
+                epoch, self.epochs, acc, iou_text, iou_kernel, loss_all, epoch_end-epoch_start))
+        
+        return acc, iou_text, iou_kernel
+
 
     def _on_epoch_finish(self):
         self.logger.info('[{}/{}], train_loss: {:.4f}, time: {:.4f}, lr: {}'.format(

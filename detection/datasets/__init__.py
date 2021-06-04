@@ -21,6 +21,15 @@ def get_dataloader(config):
         transform=transforms.ToTensor()
     )
 
+    valset = dataset.ImageDataset(
+        images_dir=os.path.join('data', config.project_name, config.val_imgs),
+        ann_path=os.path.join('data', config.project_name, config.val_anns),
+        input_size=736,
+        img_channel=3,
+        shrink_ratio=1,
+        transform=transforms.ToTensor()
+    )
+
     trainloader = DataLoader(
         dataset=trainset, 
         batch_size=config.batch_size, 
@@ -28,6 +37,14 @@ def get_dataloader(config):
         num_workers=2,
         pin_memory=True)
 
-    trainloader.dataset_len = len(trainset)
+    valloader = DataLoader(
+        dataset=valset, 
+        batch_size=config.batch_size*2, 
+        shuffle=False, 
+        num_workers=2,
+        pin_memory=True)
 
-    return trainloader
+    trainloader.dataset_len = len(trainset)
+    valloader.dataset_len = len(valset)
+
+    return trainloader, valloader

@@ -97,6 +97,8 @@ class BaseTrainer:
                 self.epoch_result = self._train_epoch(epoch)
                 self.scheduler.step()
                 self._on_epoch_finish()
+                if epoch % self.val_interval == 0:
+                    self._eval()
             except torch.cuda.CudaError:
                 self._log_memory_usage()
         self.writer.close()
