@@ -304,7 +304,7 @@ if __name__ == "__main__":
     # Scan single image specified by command line argument --image <IMAGE_PATH>
     if im_file_path:
         image_name = os.path.basename(im_file_path)
-        output_path = os.path.join(args.output, image_name)
+        output_path = os.path.join(args.output, image_name[:-4])
 
         if not os.path.exists(output_path):
             os.mkdir(output_path)
@@ -315,7 +315,7 @@ if __name__ == "__main__":
     else:
         im_files = [f for f in os.listdir(im_dir) if get_ext(f) in valid_formats]
         for im in im_files:
-            output_path = os.path.join(args.output, im)
+            output_path = os.path.join(args.output, im[:-4])
             if not os.path.exists(output_path):
                 os.mkdir(output_path)
             scanner.scan(im_dir + '/' + im, output_path)
