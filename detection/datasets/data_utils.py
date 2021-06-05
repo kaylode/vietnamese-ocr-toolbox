@@ -82,7 +82,7 @@ def generate_rbox(im_size, text_polys, text_tags,training_mask, shrink_ratio):
 
 def augmentation(im: np.ndarray, text_polys: np.ndarray, scales: np.ndarray, degrees: int) -> tuple:
     # the images are rescaled with ratio {0.5, 1.0, 2.0, 3.0} randomly
-    im, text_polys = data_aug.random_scale(im, text_polys, scales)
+    # im, text_polys = data_aug.random_scale(im, text_polys, scales)
     # the images are horizontally fliped and rotated in range [−10◦, 10◦] randomly
     if random.random() < 0.5:
         im, text_polys = data_aug.horizontal_flip(im, text_polys)
@@ -108,7 +108,7 @@ def image_label(im: np.ndarray, text_polys: np.ndarray, text_tags: list, input_s
     h, w, _ = im.shape
     # 检查越界
     text_polys = check_and_validate_polys(text_polys, (h, w))
-    # im, text_polys = augmentation(im, text_polys, scales, degrees)
+    im, text_polys = augmentation(im, text_polys, scales, degrees)
 
     h, w, _ = im.shape
     short_edge = min(h, w)

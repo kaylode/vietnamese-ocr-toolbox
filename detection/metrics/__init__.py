@@ -1,5 +1,5 @@
+import os
 from .map import mAPScores
-
 
 def get_metric(config):
     metric = mAPScores(
