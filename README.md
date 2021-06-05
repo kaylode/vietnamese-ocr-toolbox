@@ -12,6 +12,7 @@
 
 ## Pretrained
 - Pretrained PAN weights on SROIE19: [link](https://drive.google.com/file/d/1NIIGWdGdCD9c2TPqyPoiRao2tR69BXgN/view?usp=sharing)
+- Pretrained OCR weights on MCOCR2021: [link](https://drive.google.com/drive/folders/1JgCVtxA8hfUl1E4JqS3moPB_7b8lhL0w?usp=sharing)
 
 ## Inference
 - Install dependencies
@@ -24,10 +25,22 @@ cd preprocess
 python scan.py --image=<path to image> --output=<output folder>
 ```
 
-- Detect text from extracted image above:
+- Detect texts and crop regions from extracted image above:
 ```
 cd detection
-python predict.py -i=<input filename> -o=<output filename> -w=<model's checkpoint>
+python predict.py -i=<input filename> -o=<output folder> -w=<model's checkpoint>
+```
+
+- Extract text from text regions above:
+```
+cd ocr
+python predict.py -i=<input folder> -o=<output txt> -w=<ocr model's checkpoint> -c=<ocr model's config>
+```
+
+- Full pipeline:
+  - Declare ```image name``` and run
+```
+sh run.sh
 ```
 
 ## References
