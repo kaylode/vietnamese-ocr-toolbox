@@ -28,7 +28,7 @@ def sort_box(boxes):
     return sorted_boxes
 
 def crop_box(img, boxes, image_name, out_folder):
-
+    h,w,c = img.shape
     sorted_boxes = sort_box(boxes)
     # new_boxes = expand_box(img, sorted_boxes)
     for i, box in enumerate(sorted_boxes):
@@ -36,10 +36,10 @@ def crop_box(img, boxes, image_name, out_folder):
         
         (x1,y1),(x2,y2),(x3,y3),(x4,y4) = box
         x1,y1,x2,y2,x3,y3,x4,y4 = int(x1),int(y1),int(x2),int(y2),int(x3),int(y3),int(x4),int(y4)
-        min_x = min(x1,x2,x3,x4)
-        min_y = min(y1,y2,y3,y4)
-        max_x = max(x1,x2,x3,x4)
-        max_y = max(y1,y2,y3,y4)
+        min_x = max(0, min(x1,x2,x3,x4))
+        min_y = max(0, min(y1,y2,y3,y4))
+        max_x = min(w, max(x1,x2,x3,x4))
+        max_y = min(h, max(y1,y2,y3,y4))
 
         cropped = img[min_y:max_y, min_x:max_x, :]
 
