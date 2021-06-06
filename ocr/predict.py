@@ -23,11 +23,36 @@ def natural_keys(text):
 
     return [ atoi(c) for c in re.split(r'(\d+)', text) ]
 
+def find_best_rotation(img, detector):
+    best_orient = 0
+    best_score = 0
+    _, score = detector.predict(img, return_prob=True)
+    if score > best_score:
+        best_score = score
+
+    for i in range(3):
+        img = np.rot90(img)
+        _, score = detector.predict(img, return_prob=True)
+        if score > best_score:
+            best_score = score
+            best_orient = i+1
+
+    return best_orient
+
+def rotate_img(img, orient):
+    for i in range(orient):
+        img = np.rot90(img)
+    
+    return img
+    
+
 def main(config, args):
     detector = Predictor(config)
 
     if os.path.isfile(args.input):
         img = Image.open(args.input)
+        best_orient = find_best_rotation(img, detector)
+        img = rotate_img(img, best_orient)
         text = detector.predict(img)
         with open(args.output, 'w+') as f:
             f.write(text)
@@ -36,9 +61,12 @@ def main(config, args):
         img_crop_names = os.listdir(args.input)
         img_crop_names.sort(key=natural_keys)
         crop_texts = []
-        for img_crop in img_crop_names:
+        for i, img_crop in enumerate(img_crop_names):
             img_crop_path = os.path.join(args.input, img_crop)
             img = Image.open(img_crop_path)
+            if i == 0:
+                best_orient = find_best_rotation(img, detector)
+            img = rotate_img(img, best_orient)
             text = detector.predict(img)
             crop_texts.append(text)
         crop_texts = '||'.join(crop_texts)
