@@ -169,7 +169,7 @@ class DocScanner(object):
             and self.angle_range(cnt) < self.MAX_QUAD_ANGLE_RANGE)
 
 
-    def get_contour(self, rescaled_image):
+    def get_contour(self, rescaled_image, output_path):
         """
         Returns a numpy array of shape (4, 2) containing the vertices of the four corners
         of the document in the image. It considers the corners returned from get_corners()
@@ -194,7 +194,9 @@ class DocScanner(object):
         dilated = cv2.morphologyEx(gray, cv2.MORPH_CLOSE, kernel)
 
         # find edges and mark them in the output map using the Canny algorithm
+        canny_out = output_path[:-4] + '_canny.jpg'
         edged = cv2.Canny(dilated, 0, CANNY)
+        cv2.imwrite(canny_out, edged)
         test_corners = self.get_corners(edged)
 
         approx_contours = []
