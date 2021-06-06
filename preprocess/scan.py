@@ -268,7 +268,7 @@ class DocScanner(object):
         rescaled_image = imutils.resize(image, height = int(RESCALED_HEIGHT))
 
         # get the contour of the document
-        screenCnt = self.get_contour(rescaled_image)
+        screenCnt = self.get_contour(rescaled_image, output_path)
 
         # apply the perspective transformation
         warped = transform.four_point_transform(orig, screenCnt * ratio)
