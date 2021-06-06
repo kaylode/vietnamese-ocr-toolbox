@@ -18,6 +18,7 @@ def get_dataloader(config):
         input_size=config.image_size,
         img_channel=3,
         shrink_ratio=0.5,
+        train=True,
         transform=transforms.ToTensor()
     )
 
@@ -27,6 +28,7 @@ def get_dataloader(config):
         input_size=736,
         img_channel=3,
         shrink_ratio=1,
+        train=False,
         transform=transforms.ToTensor()
     )
 
