@@ -26,13 +26,13 @@ def natural_keys(text):
 def find_best_rotation(img, detector):
     best_orient = 0
     best_score = 0
-    _, score = detector.predict(img, return_prob=True)
+    t, score = detector.predict(img, return_prob=True)
     if score > best_score:
         best_score = score
-
     for i in range(3):
-        img = np.rot90(img)
-        _, score = detector.predict(img, return_prob=True)
+        img = img.transpose(Image.ROTATE_90)
+        t, score = detector.predict(img, return_prob=True)
+
         if score > best_score:
             best_score = score
             best_orient = i+1
@@ -41,7 +41,7 @@ def find_best_rotation(img, detector):
 
 def rotate_img(img, orient):
     for i in range(orient):
-        img = np.rot90(img)
+        img = img.transpose(Image.ROTATE_90)
     
     return img
     
@@ -66,6 +66,7 @@ def main(config, args):
             img = Image.open(img_crop_path)
             if i == 0:
                 best_orient = find_best_rotation(img, detector)
+                print(f"Rotate image by {best_orient*90} degrees")
             img = rotate_img(img, best_orient)
             text = detector.predict(img)
             crop_texts.append(text)
