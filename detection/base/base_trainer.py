@@ -183,7 +183,7 @@ class BaseTrainer:
         if resume:
             self.global_step = checkpoint['global_step']
             self.start_epoch = checkpoint['epoch'] + 1
-            self.config['lr_scheduler']['args']['last_epoch'] = self.start_epoch
+            # self.config['lr_scheduler']['args']['last_epoch'] = self.start_epoch
             # self.scheduler.load_state_dict(checkpoint['scheduler'])
             self.optimizer.load_state_dict(checkpoint['optimizer'])
             if 'metrics' in checkpoint:

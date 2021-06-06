@@ -92,7 +92,7 @@ def augmentation(im: np.ndarray, text_polys: np.ndarray, scales: np.ndarray, deg
 
 
 def image_label(im: np.ndarray, text_polys: np.ndarray, text_tags: list, input_size: int = 640,
-                shrink_ratio: float = 0.5, degrees: int = 10,
+                shrink_ratio: float = 0.5, degrees: int = 10, train: bool = True,
                 scales: np.ndarray = np.array([0.5, 1, 2.0, 3.0])) -> tuple:
     """
     读取图片并生成label
@@ -108,7 +108,9 @@ def image_label(im: np.ndarray, text_polys: np.ndarray, text_tags: list, input_s
     h, w, _ = im.shape
     # 检查越界
     text_polys = check_and_validate_polys(text_polys, (h, w))
-    im, text_polys = augmentation(im, text_polys, scales, degrees)
+
+    if train:
+        im, text_polys = augmentation(im, text_polys, scales, degrees)
 
     h, w, _ = im.shape
     short_edge = min(h, w)

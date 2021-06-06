@@ -9,11 +9,11 @@ from pycocotools.coco import COCO
 
 class ImageDataset(Dataset):
     def __init__(self, images_dir: str, ann_path: str, input_size: int, img_channel: int, shrink_ratio: float, transform=None,
-                 target_transform=None):
+                 target_transform=None, train=True):
 
         self.root_dir = images_dir
         self.data_list = self.load_data(ann_path)
-
+        self.train = True
         self.input_size = input_size
         self.img_channel = img_channel
         self.transform = transform
