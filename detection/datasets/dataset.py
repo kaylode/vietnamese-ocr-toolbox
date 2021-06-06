@@ -26,7 +26,7 @@ class ImageDataset(Dataset):
         if self.img_channel == 3:
             im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
         img, score_map, training_mask = image_label(im, text_polys, text_tags, self.input_size,
-                                                    self.shrink_ratio)
+                                                    self.shrink_ratio, degrees=90)
         # img = draw_bbox(img,text_polys)
         img = Image.fromarray(img)
         if self.transform:

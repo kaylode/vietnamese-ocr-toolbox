@@ -85,7 +85,7 @@ def augmentation(im: np.ndarray, text_polys: np.ndarray, scales: np.ndarray, deg
     # im, text_polys = data_aug.random_scale(im, text_polys, scales)
     # the images are horizontally fliped and rotated in range [−10◦, 10◦] randomly
     if random.random() < 0.5:
-        im, text_polys = data_aug.horizontal_flip(im, text_polys)
+        im, text_polys = data_aug.vertical_flip(im, text_polys)
     if random.random() < 0.5:
         im, text_polys = data_aug.random_rotate_img_bbox(im, text_polys, degrees)
     return im, text_polys
