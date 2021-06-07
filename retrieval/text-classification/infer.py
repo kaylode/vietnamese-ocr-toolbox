@@ -41,7 +41,7 @@ def inference(model, dataloader, device):
 
 if __name__ == "__main__":
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    meta_data_path = model_path  #'model.pth'
+    meta_data_path = sys.argv[1]  #'model.pth'
     meta_data = torch.load(meta_data_path)
     cfg = meta_data["config"]
     model_state = meta_data["model_state_dict"]
@@ -67,10 +67,11 @@ if __name__ == "__main__":
     )
 
     # Run
+    lbl_dict = {0: "SELLER", 1: "ADDRESS", 2: "TIMESTAMP", 3: "TOTAL_COST"}
     with torch.no_grad():
         preds, probs = inference(model=model, dataloader=dataloader, device=device)
 
-    res = zip(inputs, preds, probs)
+    res = list(zip(inputs, [lbl_dict[x] for x in preds], probs))
     print(res)
     # Clean up
     del model, model_state
