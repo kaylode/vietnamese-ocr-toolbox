@@ -4,6 +4,7 @@ import os
 import cv2
 import time
 import numpy as np
+import pandas as pd
 from detection.models import get_model
 from detection.config import Config
 from detection.utils.util import order_points_clockwise
@@ -35,15 +36,27 @@ def line_intersection(line1, line2):
     y = det(d, ydiff) / div
     return x, y
 
-def crop_box(img, boxes, image_name, out_folder, num_boxes=0):
+def crop_box(img, boxes, image_name, out_folder, num_boxes=0, save_csv=True):
     h,w,c = img.shape
     sorted_boxes = sort_box(boxes)
+
+    if save_csv:
+        boxes = []
+        box_names = []
+
     for i, box in enumerate(sorted_boxes):
         box_name = os.path.join(out_folder, f"{i}.jpg")
         
         (x1,y1),(x2,y2),(x3,y3),(x4,y4) = box
         x1,y1,x2,y2,x3,y3,x4,y4 = int(x1),int(y1),int(x2),int(y2),int(x3),int(y3),int(x4),int(y4)
-     
+        x1 = max(0, x1)
+        x2 = max(0, x2)
+        x3 = max(0, x3)
+        x4 = max(0, x4)
+        y1 = max(0, y1)
+        y2 = max(0, y2)
+        y3 = max(0, y3)
+        y4 = max(0, y4)
         min_x = max(0, min(x1,x2,x3,x4))
         min_y = max(0, min(y1,y2,y3,y4))
         max_x = min(w, max(x1,x2,x3,x4))
@@ -59,6 +72,8 @@ def crop_box(img, boxes, image_name, out_folder, num_boxes=0):
                               [0, th - 1]])
             matrix = cv2.getPerspectiveTransform(pt1,pt2)
             cropped = cv2.warpPerspective(img, matrix, (tw, th)) 
+            box_names.append(box_name)
+            boxes.append([x1,y1,x2,y2])
         else:
             cropped = img[min_y:max_y, min_x:max_x, :]
 
@@ -69,6 +84,15 @@ def crop_box(img, boxes, image_name, out_folder, num_boxes=0):
         
         if num_boxes>0 and i == num_boxes-1:
             break
+
+    if save_csv:
+        data = {
+            "box_names": box_names,
+            "boxes": boxes
+        }
+        out_dir = os.path.dirname(out_folder)
+        df = pd.DataFrame(data)
+        df.to_csv(os.path.join(out_dir, "box_info.csv"), index=False)
 
 
 
@@ -86,7 +110,14 @@ class PAN:
         self.net.to(self.device)
         self.net.eval()
 
-    def predict(self, img_path: str, output_dir:str =None, short_size: int = 736, crop_region=False, num_boxes=0):
+    def predict(self, 
+            img_path: str, 
+            output_dir:str =None, 
+            short_size: int = 736, 
+            crop_region: bool =False, 
+            num_boxes: int =0, 
+            save_csv: bool = True):
+
         img = cv2.imread(img_path)
         ori_img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
@@ -113,7 +144,7 @@ class PAN:
         image_name = os.path.basename(img_path)
         if crop_region:
             os.makedirs(output_dir, exist_ok=True)
-            crop_box(ori_img, boxes_list, image_name, output_dir, num_boxes=num_boxes)
+            crop_box(ori_img, boxes_list, image_name, output_dir, num_boxes=num_boxes, save_csv=save_csv)
         return preds, boxes_list, t
 
 

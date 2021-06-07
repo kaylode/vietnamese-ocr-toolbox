@@ -2,11 +2,13 @@ import os
 import cv2
 import argparse
 import numpy as np
+import pandas as pd
 from PIL import Image
 import matplotlib.pyplot as plt
 from preprocess import DocScanner
 import detection
 import ocr
+import retrieval
 
 parser = argparse.ArgumentParser("Document Extraction")
 parser.add_argument("--input", help="Path to single image to be scanned")
@@ -16,12 +18,14 @@ args = parser.parse_args()
 
 PREPROCESS_RES=f"{args.output}/preprocessed.jpg"
 DETECTION_RES=f"{args.output}/detected.jpg"
+DETECTION_CSV_RES=f"{args.output}/box_info.csv"
 DETECTION_FOLDER_RES=f"{args.output}/crops"
 OCR_RES=f"{args.output}/ocr.txt"
 
 PAN_WEIGHT="/content/drive/MyDrive/AI Competitions/MC-OCR/checkpoints/detection-checkpoints/PANNet_best.pth"
 OCR_WEIGHT="/content/drive/MyDrive/AI Competitions/MC-OCR/checkpoints/ocr-checkpoints/transformerocr.pth"
 OCR_CONFIG="/content/drive/MyDrive/AI Competitions/MC-OCR/checkpoints/ocr-checkpoints/config.yml"
+BERT_WEIGHT="/content/drive/MyDrive/AI Competitions/MC-OCR/checkpoints/retrieval-checkpoints/phobert.pth"
 
 
 if __name__ == "__main__":
@@ -50,7 +54,8 @@ if __name__ == "__main__":
         PREPROCESS_RES, 
         DETECTION_FOLDER_RES, 
         crop_region=True,
-        num_boxes=TOP_K)
+        num_boxes=TOP_K,
+        save_csv=False)
 
     orientation_scores = np.array([0.,0.,0.,0.])
     for i in range(TOP_K):
@@ -67,7 +72,8 @@ if __name__ == "__main__":
     preds, boxes_list, t = det_model.predict(
         PREPROCESS_RES, 
         DETECTION_FOLDER_RES, 
-        crop_region=True)
+        crop_region=True,
+        save_csv=True)
     
     detection.show_img(preds)
     img = detection.draw_bbox(cv2.imread(PREPROCESS_RES)[:, :, ::-1], boxes_list)
@@ -76,15 +82,47 @@ if __name__ == "__main__":
     plt.savefig(DETECTION_RES,bbox_inches='tight')
 
     # OCR
-    img_crop_names = os.listdir(DETECTION_FOLDER_RES)
-    img_crop_names.sort(key=ocr.natural_keys)
+    df = pd.read_csv(DETECTION_CSV_RES)
+
+    img_crop_names = df.box_names.tolist()
+    # img_crop_names.sort(key=ocr.natural_keys)
     crop_texts = []
     for i, img_crop in enumerate(img_crop_names):
         img_crop_path = os.path.join(DETECTION_FOLDER_RES, img_crop)
         img = Image.open(img_crop_path)
         text = ocr_model.predict(img)
         crop_texts.append(text)
+    df["texts"] = crop_texts
+    df.to_csv(DETECTION_CSV_RES, index=False)
     crop_texts = '||'.join(crop_texts)
     
     with open(OCR_RES, 'w+') as f:
         f.write(crop_texts)
+
+
+    # Information Retrieval
+
+    meta_data = torch.load(BERT_WEIGHT)
+    cfg = meta_data["config"]
+    model_state = meta_data["model_state_dict"]
+
+    retr_model = retrieval.get_instance(cfg["model"]).cuda()
+    retr_model.load_state_dict(model_state)
+
+    inputs = df.texts.tolist()
+    dataset = retrieval.MCOCRDataset_from_list(
+        inputs, pretrained_model=cfg["model"]["args"]["pretrained_model"], max_len=31,
+    )
+    dataloader = torch.utils.data.DataLoader(
+        dataset=dataset, batch_size=2, shuffle=False, pin_memory=False
+    )
+
+    # Run
+    lbl_dict = {0: "SELLER", 1: "ADDRESS", 2: "TIMESTAMP", 3: "TOTAL_COST"}
+    with torch.no_grad():
+        preds, probs = retrieval.inference(model=retr_model, dataloader=dataloader, device=torch.device("cuda:0"))
+
+    df["labels"] = [lbl_dict[x] for x in preds]
+    df["probs"] = probs
+
+    df.to_csv(DETECTION_CSV_RES, index=False)
