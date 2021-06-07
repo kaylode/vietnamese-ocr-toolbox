@@ -3,28 +3,18 @@ import torchvision.transforms as tf
 import os
 import cv2
 import time
+import numpy as np
 from detection.models import get_model
 from detection.config import Config
+from detection.utils.util import order_points_clockwise
 from detection.post_processing import decode_clip
 import argparse
 
-def expand_box(img, boxes):
-    h,w,c = img.shape
-    new_boxes = np.array(boxes)
-   
-    for i, box in enumerate(new_boxes):
-        x,y,w,h = box
-        if w>h:
-            new_boxes[i, 0] -= new_boxes[:, 3]
-            new_boxes[i, 2] += (2*new_boxes[:, 3])
-        elif w<h:
-            new_boxes[i, 1] -= new_boxes[:, 3]
-            new_boxes[i, 3] += (2*new_boxes[:, 2])
-
-    return new_boxes
-
 def sort_box(boxes):
-    sorted_boxes = sorted(boxes , key=lambda k: [k[0][1], k[0][0]])
+    sorted_boxes = []
+    for box in boxes:
+        sorted_boxes.append(order_points_clockwise(box))
+    sorted_boxes = sorted(sorted_boxes , key=lambda k: [k[0][1], k[0][0]])
     return sorted_boxes
 
 def crop_box(img, boxes, image_name, out_folder, find_rotation):
@@ -40,8 +30,19 @@ def crop_box(img, boxes, image_name, out_folder, find_rotation):
         min_y = max(0, min(y1,y2,y3,y4))
         max_x = min(w, max(x1,x2,x3,x4))
         max_y = min(h, max(y1,y2,y3,y4))
-
-        cropped = img[min_y:max_y, min_x:max_x, :]
+        
+        if not find_rotation:
+            tw = max_x - min_x
+            th = max_y - min_y
+            pt1 = np.float32([(x1,y1),(x2,y2),(x3,y3),(x4,y4)])
+            pt2 = np.float32([[0, 0],
+                              [tw - 1, 0],
+                              [tw - 1, th - 1],
+                              [0, th - 1]])
+            matrix = cv2.getPerspectiveTransform(pt1,pt2)
+            cropped = cv2.warpPerspective(img, matrix, (tw, th)) 
+        else:
+            cropped = img[min_y:max_y, min_x:max_x, :]
 
         try:
             cv2.imwrite(box_name, cropped)
