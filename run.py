@@ -30,12 +30,39 @@ if __name__ == "__main__":
     os.makedirs(args.output,exist_ok=True)
     scanner.scan(args.input, PREPROCESS_RES)
 
-    # Text detection
+    # Text detection model + OCR model config
     det_config = detection.Config(os.path.join('detection', 'config','configs.yaml'))
     os.environ['CUDA_VISIBLE_DEVICES'] = det_config.gpu_devices
-    
-    model = detection.PAN(det_config, model_path=PAN_WEIGHT)
-    preds, boxes_list, t = model.predict(PREPROCESS_RES, DETECTION_FOLDER_RES, crop_region=True)
+    ocr_config = ocr.Cfg.load_config_from_file(OCR_CONFIG)
+    ocr_config['weights'] = OCR_WEIGHT
+    ocr_config['cnn']['pretrained']=False
+    ocr_config['device'] = 'cuda:0'
+    ocr_config['predictor']['beamsearch']=False
+
+    det_model = detection.PAN(det_config, model_path=PAN_WEIGHT)
+    ocr_model = ocr.Predictor(ocr_config)
+
+    # Find best rotation by forwarding one pioneering image and calculate the score for each orientation
+
+    preds, boxes_list, t = det_model.predict(
+        PREPROCESS_RES, 
+        DETECTION_FOLDER_RES, 
+        crop_region=True,
+        find_rotation=True)
+
+    img = Image.open(os.path.join(DETECTION_FOLDER_RES, '0.jpg'))
+    best_orient = ocr.find_best_rotation(img, ocr_model)
+    print(f"Rotate image by {best_orient*90} degrees")
+
+    # Rotate the original image
+    rotated_img = ocr.rotate_img(Image.open(PREPROCESS_RES), best_orient)
+    rotated_img.save(PREPROCESS_RES)
+
+    # Detect and OCR for final result
+    preds, boxes_list, t = det_model.predict(
+        PREPROCESS_RES, 
+        DETECTION_FOLDER_RES, 
+        crop_region=True)
     
     detection.show_img(preds)
     img = detection.draw_bbox(cv2.imread(PREPROCESS_RES)[:, :, ::-1], boxes_list)
@@ -44,26 +71,13 @@ if __name__ == "__main__":
     plt.savefig(DETECTION_RES,bbox_inches='tight')
 
     # OCR
-    ocr_config = ocr.Cfg.load_config_from_file(OCR_CONFIG)
-    ocr_config['weights'] = OCR_WEIGHT
-
-    ocr_config['cnn']['pretrained']=False
-    ocr_config['device'] = 'cuda:0'
-    ocr_config['predictor']['beamsearch']=False
-
-    model = ocr.Predictor(ocr_config)
-
     img_crop_names = os.listdir(DETECTION_FOLDER_RES)
     img_crop_names.sort(key=ocr.natural_keys)
     crop_texts = []
     for i, img_crop in enumerate(img_crop_names):
         img_crop_path = os.path.join(DETECTION_FOLDER_RES, img_crop)
         img = Image.open(img_crop_path)
-        if i == 0:
-            best_orient = ocr.find_best_rotation(img, model)
-            print(f"Rotate image by {best_orient*90} degrees")
-        img = ocr.rotate_img(img, best_orient)
-        text = model.predict(img)
+        text = ocr_model.predict(img)
         crop_texts.append(text)
     crop_texts = '||'.join(crop_texts)
     
