@@ -14,18 +14,36 @@ def sort_box(boxes):
     sorted_boxes = []
     for box in boxes:
         sorted_boxes.append(order_points_clockwise(box))
-    sorted_boxes = sorted(sorted_boxes , key=lambda k: [k[0][1], k[0][0]])
+    mid_points = [line_intersection((box[0],box[2]), (box[1], box[3])) for box in sorted_boxes]
+    sorted_indices = np.argsort(mid_points, axis=0)
+    sorted_boxes = sorted(sorted_boxes , key=lambda sorted_indices: [sorted_indices[0][1], sorted_indices[0][0]]) 
     return sorted_boxes
+
+def line_intersection(line1, line2):
+    xdiff = (line1[0][0] - line1[1][0], line2[0][0] - line2[1][0])
+    ydiff = (line1[0][1] - line1[1][1], line2[0][1] - line2[1][1])
+
+    def det(a, b):
+        return a[0] * b[1] - a[1] * b[0]
+
+    div = det(xdiff, ydiff)
+    if div == 0:
+       raise Exception('lines do not intersect')
+
+    d = (det(*line1), det(*line2))
+    x = det(d, xdiff) / div
+    y = det(d, ydiff) / div
+    return x, y
 
 def crop_box(img, boxes, image_name, out_folder, num_boxes=0):
     h,w,c = img.shape
     sorted_boxes = sort_box(boxes)
-    # new_boxes = expand_box(img, sorted_boxes)
     for i, box in enumerate(sorted_boxes):
         box_name = os.path.join(out_folder, f"{i}.jpg")
         
         (x1,y1),(x2,y2),(x3,y3),(x4,y4) = box
         x1,y1,x2,y2,x3,y3,x4,y4 = int(x1),int(y1),int(x2),int(y2),int(x3),int(y3),int(x4),int(y4)
+     
         min_x = max(0, min(x1,x2,x3,x4))
         min_y = max(0, min(y1,y2,y3,y4))
         max_x = min(w, max(x1,x2,x3,x4))
