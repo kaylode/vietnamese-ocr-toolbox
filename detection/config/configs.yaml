@@ -26,7 +26,7 @@ settings:
 
   lr_scheduler:
     name: "step_lr"                      #[plateau | cosine | 1cycle-yolo | 1cycle]
-    step_size: 200
+    step_size: 15
     gamma: 0.1                                   # if need to specify more scheduler arguments, do it here
 
   model:

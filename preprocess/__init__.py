@@ -1,0 +1,1 @@
+from .scan import DocScanner
