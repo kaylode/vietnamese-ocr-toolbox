@@ -9,7 +9,7 @@ import os
 import codecs
 import traceback
 import numpy as np
-from utils import order_points_clockwise
+from detection.utils import order_points_clockwise
 
 def print_help():
     sys.stdout.write('Usage: python %s.py -g=<gtFile> -s=<submFile> [-o=<outputFolder> -p=<jsonParams>]' %sys.argv[0])

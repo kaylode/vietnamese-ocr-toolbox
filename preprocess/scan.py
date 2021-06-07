@@ -4,8 +4,8 @@
 # To scan all images in a directory automatically:
 # python scan.py --images sample_images
 
-from pyimagesearch import transform
-from pyimagesearch import imutils
+from .pyimagesearch import transform
+from .pyimagesearch import imutils
 from scipy.spatial import distance as dist
 from matplotlib.patches import Polygon
 import numpy as np
@@ -19,12 +19,7 @@ import argparse
 import os
 
 
-parser = argparse.ArgumentParser("Document Extraction")
-parser.add_argument("--images", default=None, help="Directory of images to be scanned")
-parser.add_argument("--image", default=None, help="Path to single image to be scanned")
-parser.add_argument("--output", default="./results", help="Path to single image to be scanned")
 
-args = parser.parse_args()
 
 
 class DocScanner(object):
@@ -293,7 +288,13 @@ class DocScanner(object):
 
 
 if __name__ == "__main__":
-    
+    parser = argparse.ArgumentParser("Document Extraction")
+    parser.add_argument("--images", default=None, help="Directory of images to be scanned")
+    parser.add_argument("--image", default=None, help="Path to single image to be scanned")
+    parser.add_argument("--output", default="./results", help="Path to single image to be scanned")
+
+    args = parser.parse_args()
+
     im_dir = args.images
     im_file_path = args.image
 

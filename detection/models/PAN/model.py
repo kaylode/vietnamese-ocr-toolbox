@@ -5,7 +5,7 @@
 import torch
 from torch import nn
 import torch.nn.functional as F
-from models.modules import *
+from detection.models.PAN.modules import *
 
 backbone_dict = {'resnet18': {'models': resnet18, 'out': [64, 128, 256, 512]},
                  'resnet34': {'models': resnet34, 'out': [64, 128, 256, 512]},

@@ -2,6 +2,7 @@ import os
 import cv2
 import argparse
 from PIL import Image
+import matplotlib.pyplot as plt
 from preprocess import DocScanner
 import detection
 import ocr
@@ -36,9 +37,9 @@ if __name__ == "__main__":
     model = detection.PAN(det_config, model_path=PAN_WEIGHT)
     preds, boxes_list, t = model.predict(PREPROCESS_RES, DETECTION_FOLDER_RES, crop_region=True)
     
-    show_img(preds)
-    img = draw_bbox(cv2.imread(PREPROCESS_RES)[:, :, ::-1], boxes_list)
-    show_img(img, color=True)
+    detection.show_img(preds)
+    img = detection.draw_bbox(cv2.imread(PREPROCESS_RES)[:, :, ::-1], boxes_list)
+    detection.show_img(img, color=True)
     plt.axis('off')
     plt.savefig(DETECTION_RES,bbox_inches='tight')
 

@@ -3,9 +3,9 @@ import torchvision.transforms as tf
 import os
 import cv2
 import time
-from models import get_model
-from config import Config
-from post_processing import decode_clip
+from detection.models import get_model
+from detection.config import Config
+from detection.post_processing import decode_clip
 import argparse
 
 def expand_box(img, boxes):
