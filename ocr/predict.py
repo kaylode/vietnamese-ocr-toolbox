@@ -1,6 +1,7 @@
 import os
 import re
 from PIL import Image
+import numpy as np
 from vietocr.tool.predictor import Predictor
 from vietocr.tool.config import Cfg
 import argparse
@@ -16,21 +17,15 @@ def natural_keys(text):
 
     return [ atoi(c) for c in re.split(r'(\d+)', text) ]
 
-def find_best_rotation(img, detector):
-    best_orient = 0
-    best_score = 0
+def find_rotation_score(img, detector):
+    scores = []
     t, score = detector.predict(img, return_prob=True)
-    if score > best_score:
-        best_score = score
+    scores.append(score)
     for i in range(3):
         img = img.transpose(Image.ROTATE_90)
         t, score = detector.predict(img, return_prob=True)
-
-        if score > best_score:
-            best_score = score
-            best_orient = i+1
-
-    return best_orient
+        scores.append(score)
+    return np.array(scores)
 
 def rotate_img(img, orient):
     for i in range(orient):

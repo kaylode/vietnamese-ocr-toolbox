@@ -1,6 +1,7 @@
 import os
 import cv2
 import argparse
+import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
 from preprocess import DocScanner
@@ -43,15 +44,19 @@ if __name__ == "__main__":
     ocr_model = ocr.Predictor(ocr_config)
 
     # Find best rotation by forwarding one pioneering image and calculate the score for each orientation
+    TOP_K = 5
 
     preds, boxes_list, t = det_model.predict(
         PREPROCESS_RES, 
         DETECTION_FOLDER_RES, 
         crop_region=True,
-        find_rotation=True)
+        num_boxes=TOP_K)
 
-    img = Image.open(os.path.join(DETECTION_FOLDER_RES, '0.jpg'))
-    best_orient = ocr.find_best_rotation(img, ocr_model)
+    orientation_scores = np.array([0.,0.,0.,0.])
+    for i in range(TOP_K):
+        img = Image.open(os.path.join(DETECTION_FOLDER_RES, f'{i}.jpg'))
+        orientation_scores += ocr.find_rotation_score(img, ocr_model)
+    best_orient = np.argmax(orientation_scores)
     print(f"Rotate image by {best_orient*90} degrees")
 
     # Rotate the original image

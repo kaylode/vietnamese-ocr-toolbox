@@ -17,7 +17,7 @@ def sort_box(boxes):
     sorted_boxes = sorted(sorted_boxes , key=lambda k: [k[0][1], k[0][0]])
     return sorted_boxes
 
-def crop_box(img, boxes, image_name, out_folder, find_rotation):
+def crop_box(img, boxes, image_name, out_folder, num_boxes=0):
     h,w,c = img.shape
     sorted_boxes = sort_box(boxes)
     # new_boxes = expand_box(img, sorted_boxes)
@@ -31,7 +31,7 @@ def crop_box(img, boxes, image_name, out_folder, find_rotation):
         max_x = min(w, max(x1,x2,x3,x4))
         max_y = min(h, max(y1,y2,y3,y4))
         
-        if not find_rotation:
+        if num_boxes==0:
             tw = max_x - min_x
             th = max_y - min_y
             pt1 = np.float32([(x1,y1),(x2,y2),(x3,y3),(x4,y4)])
@@ -49,7 +49,7 @@ def crop_box(img, boxes, image_name, out_folder, find_rotation):
         except:
             print(box_name, " is missing")
         
-        if find_rotation and i == 0:
+        if num_boxes>0 and i == num_boxes-1:
             break
 
 
@@ -68,7 +68,7 @@ class PAN:
         self.net.to(self.device)
         self.net.eval()
 
-    def predict(self, img_path: str, output_dir:str =None, short_size: int = 736, crop_region=False, find_rotation=False):
+    def predict(self, img_path: str, output_dir:str =None, short_size: int = 736, crop_region=False, num_boxes=0):
         img = cv2.imread(img_path)
         ori_img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
@@ -95,7 +95,7 @@ class PAN:
         image_name = os.path.basename(img_path)
         if crop_region:
             os.makedirs(output_dir, exist_ok=True)
-            crop_box(ori_img, boxes_list, image_name, output_dir, find_rotation)
+            crop_box(ori_img, boxes_list, image_name, output_dir, num_boxes=num_boxes)
         return preds, boxes_list, t
 
 
