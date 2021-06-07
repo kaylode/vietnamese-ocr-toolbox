@@ -1,16 +1,25 @@
 import sys
+import numpy as np
+import pandas as pd
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
 
 sys.path.append("./libs/")
 
-import torch
-import torch.nn as nn
-import numpy as np
-from torch.utils.data import DataLoader, Dataset
-from datasets import MCOCRDataset
-from models import AutoModelForClassification
+from customdatasets import MCOCRDataset
+from torch.utils.data import DataLoader
 from tqdm import tqdm
+from transformers import AutoTokenizer
+from utils.getter import get_instance
 
-from sklearn.metrics import mean_squared_error
+
+class MCOCRDataset_from_list(MCOCRDataset):
+    def __init__(self, ls, pretrained_model, max_len):
+        self.is_train = False
+        self.max_len = max_len
+        self.df = pd.DataFrame.from_dict({"text": ls, "lbl": len(ls) * [0],})
+        self.tokenizer = AutoTokenizer.from_pretrained(pretrained_model)
 
 
 def inference(model, dataloader, device):
@@ -22,29 +31,36 @@ def inference(model, dataloader, device):
         input_ids = x["input_ids"].to(device)
         attention_mask = x["attention_mask"].to(device)
         outputs = model(input_ids, attention_mask)
-        preds += [outputs.detach().cpu().numpy()]
-        targets.extend(target)
+        outputs = F.softmax(outputs, dim=1)
+        preds += [(outputs.detach().cpu().numpy())]
 
     preds = np.concatenate(preds, axis=0)
-    return preds
+
+    return np.argmax(preds, 1), np.max(preds, 1)
 
 
 if __name__ == "__main__":
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    meta_data_path = model_path  #'model.pth'
+    meta_data = torch.load(meta_data_path)
+    cfg = meta_data["config"]
+    model_state = meta_data["model_state_dict"]
 
-    pretrained = str(sys.argv[1])  #'bert-base-uncased'
-
-    model = AutoModelForClassification(pretrained_model=pretrained)
-    model.to(device)
-    model_state_path = str(sys.argv[2])  #'model.pth'
-    model_state = torch.load(model_state_path)["model_state_dict"]
+    inputs = [
+        "co.op mart",
+        "Co.opMart HAU GIANG",
+        "188 Hau Giang, P.6, Q.6, TpHCM",
+        "Dat hang qua DT: 028.39.600.913",
+        "Ngày: 21/05/2020",
+        "20 : 42 : 52",
+        "Tong so tien thanh toan:",
+        "16,200.00",
+    ]
+    model = get_instance(cfg["model"]).to(device)
     model.load_state_dict(model_state)
 
-    dataset = MCOCRDataset(
-        pretrained_model=pretrained,
-        csv_path=f"{sys.argv[3]}.csv",
-        is_train=True,
-        max_len=31,
+    dataset = MCOCRDataset_from_list(
+        inputs, pretrained_model=cfg["model"]["args"]["pretrained_model"], max_len=31,
     )
     dataloader = DataLoader(
         dataset=dataset, batch_size=2, shuffle=False, pin_memory=False
@@ -52,10 +68,9 @@ if __name__ == "__main__":
 
     # Run
     with torch.no_grad():
-        preds, targets = inference(model=model, dataloader=dataloader, device=device)
+        preds, probs = inference(model=model, dataloader=dataloader, device=device)
 
-    print((mean_squared_error(targets, preds)) ** 0.5)
-
+    res = zip(inputs, preds, probs)
+    print(res)
     # Clean up
     del model, model_state
-

@@ -44,6 +44,22 @@ class MCOCRDataset(Dataset):
             }
 
 
+class MCOCRDataset_from_list(MCOCRDataset):
+    def __init__(self, ls, pretrained_model, max_len):
+        # super(MCOCRDataset_from_list, self).__init__(
+        #     pretrained_model=pretrained_model, csv_path=None, max_len=max_len
+        # )
+        # self.csv_path = csv_path
+        # self.is_train = is_train
+        # self.max_len = max_len
+        # self.df = pd.read_csv(self.csv_path)
+        # self.tokenizer = AutoTokenizer.from_pretrained(pretrained_model)
+        self.is_train = False
+        self.max_len = max_len
+        self.df = pd.DataFrame.from_dict({"text": ls, "lbl": len(ls) * [0],})
+        self.tokenizer = AutoTokenizer.from_pretrained(pretrained_model)
+
+
 if __name__ == "__main__":
     dataset = MCOCRDataset(
         pretrained_model="vinai/phobert-base",

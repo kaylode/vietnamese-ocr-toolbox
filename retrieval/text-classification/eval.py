@@ -1,16 +1,13 @@
 import sys
 
 sys.path.append("./libs/")
-
+import numpy as np
 import torch
 import torch.nn as nn
-import numpy as np
-from torch.utils.data import DataLoader, Dataset
-from datasets import MCOCRDataset
-from models import AutoModelForClassification
+from customdatasets import MCOCRDataset
+from torch.utils.data import DataLoader
 from tqdm import tqdm
-
-from sklearn.metrics import mean_squared_error
+from utils.getter import get_instance
 
 
 def inference(model, dataloader, device):
@@ -32,18 +29,17 @@ def inference(model, dataloader, device):
 
 if __name__ == "__main__":
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    meta_data_path = model_path  #'model.pth'
+    meta_data = torch.load(meta_data_path)
+    cfg = meta_data["config"]
+    model_state = meta_data["model_state_dict"]
 
-    pretrained = str(sys.argv[1])  #'bert-base-uncased'
-
-    model = AutoModelForClassification(pretrained_model=pretrained)
-    model.to(device)
-    model_state_path = str(sys.argv[2])  #'model.pth'
-    model_state = torch.load(model_state_path)["model_state_dict"]
+    model = get_instance(cfg["model"]).to(device)
     model.load_state_dict(model_state)
 
     dataset = MCOCRDataset(
-        pretrained_model=pretrained,
-        csv_path=f"data/k-folds/val/val_fold_{sys.argv[3]}.csv",
+        pretrained_model=cfg["model"]["args"]["pretrained_model"],
+        csv_path=f"data/splitted_train_val/val.csv",
         is_train=True,
         max_len=31,
     )
@@ -55,8 +51,13 @@ if __name__ == "__main__":
     with torch.no_grad():
         preds, targets = inference(model=model, dataloader=dataloader, device=device)
 
-    print((mean_squared_error(targets, preds)) ** 0.5)
+    metric = {mcfg["name"]: get_instance(mcfg) for mcfg in cfg["metric"]}
+    for m in metric.values():
+        preds = torch.Tensor(preds)
+        targets = torch.Tensor(targets)
+        value = m.calculate(preds, targets)
+        m.update(value)
+        m.summary()
 
     # Clean up
     del model, model_state
-
