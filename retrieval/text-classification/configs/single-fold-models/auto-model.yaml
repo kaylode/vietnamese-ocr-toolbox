@@ -1,0 +1,60 @@
+id:                             auto-model
+pretrained:                     Null
+model:
+    name:                       AutoModelForClassification
+    args:
+        pretrained_model:       vinai/phobert-base
+        num_labels:             4
+        freeze_backbone:        True
+optimizer:
+    name:                       Adam
+    args:
+        lr:                     0.00001
+loss:
+    name:                       FocalLoss
+    args:                       Null
+metric:
+    -   name:                   Accuracy
+        args:                   Null
+scheduler:
+    name:                       StepLR
+    args:
+        step_size:              3
+        gamma:                  0.2
+        last_epoch:             -1
+dataset:
+    num_folds:                  
+    train:
+        name:                   MCOCRDataset
+        args:   
+            pretrained_model:   vinai/phobert-base
+            csv_path:           data/splitted_train_val/train.csv
+            is_train:           True  
+            max_len:            31
+        loader:
+            name: DataLoader
+            args:
+                batch_size:     2
+                shuffle:        True
+                drop_last:      False
+                num_workers:    4
+                pin_memory:     True
+    val:
+        name:                   MCOCRDataset
+        args:
+            pretrained_model:   vinai/phobert-base
+            csv_path:           data/splitted_train_val/val.csv
+            is_train:           True
+            max_len:            31
+        loader:
+            name: DataLoader
+            args:
+                batch_size:     2
+                shuffle:        False
+                num_workers:    4
+                pin_memory:     True
+
+trainer: 
+    nepochs: 15
+    val_step: 1
+    log_step: 1
