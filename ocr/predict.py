@@ -5,13 +5,6 @@ from vietocr.tool.predictor import Predictor
 from vietocr.tool.config import Cfg
 import argparse
 
-parser = argparse.ArgumentParser("Inference PAN")
-parser.add_argument('--input', '-i', type=str, help='Path to input image')
-parser.add_argument('--output', '-o', type=str, help='Path to save output txt')
-parser.add_argument('--weight', '-w', type=str, help='Path to trained model')
-parser.add_argument('--config', '-c', type=str, help='Path to trained model config')
-args = parser.parse_args()
-
 def natural_keys(text):
     '''
     alist.sort(key=natural_keys) sorts in human order
@@ -76,6 +69,13 @@ def main(config, args):
             f.write(crop_texts)
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser("Inference PAN")
+    parser.add_argument('--input', '-i', type=str, help='Path to input image')
+    parser.add_argument('--output', '-o', type=str, help='Path to save output txt')
+    parser.add_argument('--weight', '-w', type=str, help='Path to trained model')
+    parser.add_argument('--config', '-c', type=str, help='Path to trained model config')
+    args = parser.parse_args()
+
     config = Cfg.load_config_from_file(args.config)
     config['weights'] = args.weight
 
