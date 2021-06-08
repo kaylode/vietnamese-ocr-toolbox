@@ -33,16 +33,28 @@ def visualize(img, boxes, texts, labels, probs, img_name):
     """
     Visualize an image with its bouding boxes
     """
-
     STANDARD_COLORS = [(255,0,0), (0,255,0), (0,0,255), (255,255,0)]
     lbl_dict = {"SELLER":0, "ADDRESS":1, "TIMESTAMP":2, "TOTAL_COST":3}
 
-    fig,ax = plt.subplots(figsize=(8,8))
 
+
+    def find_highest_score_each_class(labels, probs):
+        best_score = [0,0,0,0]
+        best_idx = [-1,-1,-1,-1]
+        for i, (label, prob) in enumerate(zip(labels, probs)):
+            label_idx = lbl_dict[label]
+            if prob > best_score[label_idx]:
+                best_score[label_idx] = prob
+                best_idx[label_idx] = i
+        return best_idx
+    
+    best_score_idx = find_highest_score_each_class(labels, probs)
+    fig,ax = plt.subplots(figsize=(8,8))
+    
     
     # Create a Rectangle patch
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    for (box,text,label,prob) in zip(boxes,texts,labels,probs):
+    for i, (box,text,label,prob) in enumerate(zip(boxes,texts,labels,probs)):
         label_idx = lbl_dict[label]
         color = STANDARD_COLORS[label_idx]
         box = eval(box)
@@ -50,8 +62,11 @@ def visualize(img, boxes, texts, labels, probs, img_name):
         box = np.array([(x1,y1),(x2,y2),(x3,y3),(x4,y4)])
         img = detection.draw_bbox(img, [box], color=color)
         score = np.round(float(prob), 3)
-        plt_text = f'{text}: {label} | {score}'
-        plt.text(x1, y1-3, plt_text, color = [i/255 for i in color], fontsize=10, weight="bold")
+
+        if i in best_score_idx:
+            plt_text = f'{text}: {label} | {score}'
+            plt.text(x1, y1-3, plt_text, color = [i/255 for i in color], fontsize=10, weight="bold")
+            
     # Display the image
     
     ax.imshow(img)
