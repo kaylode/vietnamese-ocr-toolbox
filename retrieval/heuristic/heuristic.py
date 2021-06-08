@@ -1,5 +1,6 @@
 from collections import defaultdict
 import difflib
+import re
 
 class TrieNode:
     def __init__(self):
@@ -44,8 +45,12 @@ def get_multiple_trie_match(texts, dictionary):
     matcher = Matcher(dictionary)
     for query_txt in texts:
         key, score = matcher.get_match(query_txt)
-        preds.append(dictionary[key])
-        probs.append(score)
+        if key is None:
+            preds.append(0)
+            probs.append(0.0)
+        else:
+            preds.append(dictionary[key])
+            probs.append(score)
     return preds, probs
 
 def get_multiple_diff_match(texts, dictionary):
@@ -62,6 +67,20 @@ def get_multiple_diff_match(texts, dictionary):
         preds.append(dictionary[key])
         probs.append(score)
     return preds, probs
+
+
+def regex_timestamp(texts):
+    preds = []
+    time = r'\d{2}:\d{2}:\d{2}'
+    date = r'(\d+/\d+/\d+)'
+    regex = '|'.join([time,date])
+    for query_txt in texts:
+        x = re.search(regex, query_txt)
+        if x:
+            preds.append(1)
+        else:
+            preds.append(0)
+    return preds
 
 def get_heuristic_retrieval(type_='diff'):
     return get_multiple_trie_match if type_=='trie' else get_multiple_diff_match

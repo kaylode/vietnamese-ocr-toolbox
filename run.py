@@ -81,6 +81,32 @@ def visualize(img, boxes, texts, labels, probs, img_name):
     plt.savefig(img_name,bbox_inches='tight')
     plt.close()
 
+def merge_result(df):
+    preds = []
+    probs = []
+
+    for id, row in df.iterrows():
+        if row["timestamp"] == 1:
+            preds.append("TIMESTAMP")
+            probs.append(1.0)
+        elif row["bert_labels"] == "ADDRESS":
+            preds.append(row["bert_labels"])
+            probs.append(row["bert_probs"])
+        elif row["bert_labels"] == "SELLER" and row["diff_labels"] == "SELLER":
+            preds.append(row["diff_labels"])
+            probs.append(row["bert_probs"] + row["diff_probs"])
+        elif row["bert_labels"] == "TOTAL_COST" and row["diff_labels"] == "TOTAL_COST":
+            preds.append(row["bert_labels"])
+            probs.append(row["bert_probs"] + row["diff_probs"])
+        else:
+            preds.append(row["bert_labels"])
+            probs.append(row["bert_probs"])
+
+    return preds, probs
+
+    
+
+
 if __name__ == "__main__":
 
     # Document extraction
@@ -155,39 +181,56 @@ if __name__ == "__main__":
 
     inputs = df.texts.tolist()
 
-    USE_BERT=False
+    ## Use BERT
+    meta_data = torch.load(BERT_WEIGHT)
+    cfg = meta_data["config"]
+    model_state = meta_data["model_state_dict"]
 
-    if USE_BERT:
-        meta_data = torch.load(BERT_WEIGHT)
-        cfg = meta_data["config"]
-        model_state = meta_data["model_state_dict"]
+    retr_model = retrieval.get_instance(cfg["model"]).cuda()
+    retr_model.load_state_dict(model_state)
 
-        retr_model = retrieval.get_instance(cfg["model"]).cuda()
-        retr_model.load_state_dict(model_state)
+    dataset = retrieval.MCOCRDataset_from_list(
+        inputs, pretrained_model=cfg["model"]["args"]["pretrained_model"], max_len=31,
+        preproc=True
+    )
 
-        dataset = retrieval.MCOCRDataset_from_list(
-            inputs, pretrained_model=cfg["model"]["args"]["pretrained_model"], max_len=31,
-            preproc=True
-        )
+    dataloader = torch.utils.data.DataLoader(
+        dataset=dataset, batch_size=2, shuffle=False, pin_memory=False
+    )
 
-        dataloader = torch.utils.data.DataLoader(
-            dataset=dataset, batch_size=2, shuffle=False, pin_memory=False
-        )
+    with torch.no_grad():
+        preds, probs = retrieval.inference(model=retr_model, dataloader=dataloader, device=torch.device("cuda:0"))
+    
+    df["bert_labels"] = [IDX_TO_LABEL[x] for x in preds]
+    df["bert_probs"] = probs
 
-        with torch.no_grad():
-            preds, probs = retrieval.inference(model=retr_model, dataloader=dataloader, device=torch.device("cuda:0"))
-    else:
-        retr_df = pd.read_csv('./retrieval/heuristic/data-full-digit.csv')
-        retr_texts = {}
-        for id, row in retr_df.iterrows():
-            retr_texts[row.text.upper()] = row.lbl
+    ## HEURISTICS
+    retr_df = pd.read_csv('./retrieval/heuristic/data-full-digit.csv')
+    retr_texts = {}
+    for id, row in retr_df.iterrows():
+        retr_texts[row.text.upper()] = row.lbl
 
-        inference = retrieval.get_heuristic_retrieval('diff')
-        preds, probs = inference(inputs,retr_texts)
+    inference = retrieval.get_heuristic_retrieval('diff')
+    preds, probs = inference(inputs,retr_texts)
 
-    df["labels"] = [IDX_TO_LABEL[x] for x in preds]
+    df["diff_labels"] = [IDX_TO_LABEL[x] for x in preds]
+    df["diff_probs"] = probs
+
+    inference = retrieval.get_heuristic_retrieval('trie')
+    preds, probs = inference(inputs,retr_texts)
+
+    df["trie_labels"] = [IDX_TO_LABEL[x] for x in preds]
+    df["trie_probs"] = probs
+
+    ## TIMESTAMPS
+    timestamps = retrieval.regex_timestamp(inputs)
+
+    df["timestamp"] = timestamps
+
+    ## Merge results
+    preds, probs = merge_result(df)
+    df["labels"] = preds
     df["probs"] = probs
-
     df.to_csv(DETECTION_CSV_RES, index=False)
 
     # Visualize result
