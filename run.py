@@ -30,12 +30,14 @@ OCR_WEIGHT="/content/drive/MyDrive/AI Competitions/MC-OCR/checkpoints/ocr-checkp
 OCR_CONFIG="/content/drive/MyDrive/AI Competitions/MC-OCR/checkpoints/ocr-checkpoints/config.yml"
 BERT_WEIGHT="/content/drive/MyDrive/AI Competitions/MC-OCR/checkpoints/retrieval-checkpoints/phobert_report.pth"
 
+LABEL_TO_IDX = {"SELLER":0, "ADDRESS":1, "TIMESTAMP":2, "TOTAL_COST":3}
+IDX_TO_LABEL = {0: "SELLER", 1: "ADDRESS", 2: "TIMESTAMP", 3: "TOTAL_COST"}
+
 def visualize(img, boxes, texts, labels, probs, img_name):
     """
     Visualize an image with its bouding boxes
     """
     STANDARD_COLORS = [(255,0,0), (0,255,0), (0,0,255), (255,255,0)]
-    lbl_dict = {"SELLER":0, "ADDRESS":1, "TIMESTAMP":2, "TOTAL_COST":3}
 
     dpi = matplotlib.rcParams['figure.dpi']
     # Determine the figures size in inches to fit your image
@@ -46,7 +48,7 @@ def visualize(img, boxes, texts, labels, probs, img_name):
         best_score = [0,0,0,0]
         best_idx = [-1,-1,-1,-1]
         for i, (label, prob) in enumerate(zip(labels, probs)):
-            label_idx = lbl_dict[label]
+            label_idx = LABEL_TO_IDX[label]
             if prob > best_score[label_idx]:
                 best_score[label_idx] = prob
                 best_idx[label_idx] = i
@@ -59,7 +61,7 @@ def visualize(img, boxes, texts, labels, probs, img_name):
     # Create a Rectangle patch
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     for i, (box,text,label,prob) in enumerate(zip(boxes,texts,labels,probs)):
-        label_idx = lbl_dict[label]
+        label_idx = LABEL_TO_IDX[label]
         color = STANDARD_COLORS[label_idx]
         box = eval(box)
         x1,y1,x2,y2,x3,y3,x4,y4 = box
@@ -152,9 +154,8 @@ if __name__ == "__main__":
     # Information Retrieval
 
     inputs = df.texts.tolist()
-    lbl_dict = {0: "SELLER", 1: "ADDRESS", 2: "TIMESTAMP", 3: "TOTAL_COST"}
 
-    USE_BERT=True
+    USE_BERT=False
 
     if USE_BERT:
         meta_data = torch.load(BERT_WEIGHT)
@@ -181,10 +182,10 @@ if __name__ == "__main__":
         for id, row in retr_df.iterrows():
             retr_texts[row.text.upper()] = row.lbl
 
-        inference = retrieval.get_heuristic_retrieval()
-        preds, probs = inference(inputs, lbl_dict,retr_texts)
+        inference = retrieval.get_heuristic_retrieval('diff')
+        preds, probs = inference(inputs,retr_texts)
 
-    df["labels"] = [lbl_dict[x] for x in preds]
+    df["labels"] = [IDX_TO_LABEL[x] for x in preds]
     df["probs"] = probs
 
     df.to_csv(DETECTION_CSV_RES, index=False)
