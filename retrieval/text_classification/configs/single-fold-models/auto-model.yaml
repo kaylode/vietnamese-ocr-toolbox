@@ -28,7 +28,7 @@ dataset:
         name:                   MCOCRDataset
         args:   
             pretrained_model:   vinai/phobert-base
-            csv_path:           data/splitted_train_val/train.csv
+            csv_path:           data/splitted_train_val_clean/train.csv
             is_train:           True  
             max_len:            31
         loader:
@@ -43,7 +43,7 @@ dataset:
         name:                   MCOCRDataset
         args:
             pretrained_model:   vinai/phobert-base
-            csv_path:           data/splitted_train_val/val.csv
+            csv_path:           data/splitted_train_val_clean/val.csv
             is_train:           True
             max_len:            31
         loader:
