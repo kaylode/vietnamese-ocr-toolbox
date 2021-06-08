@@ -13,12 +13,37 @@ from tqdm import tqdm
 from transformers import AutoTokenizer
 from utils.getter import get_instance
 
+from string import punctuation
+import re
+
+
+def clean(s):
+    res = re.sub(r"(\w)(\()(\w)", "\g<1> \g<2>\g<3>", s)
+    res = re.sub(r"\b\d+\b", "", res)
+    res = re.sub(r"(\w)([),.:;]+)(\w)", "\g<1>\g<2> \g<3>", res)
+    res = re.sub(r"(\w)(\.\()(\w)", "\g<1>. (\g<3>", res)
+    res = re.sub(r"\s+", " ", res)
+    res = res.strip()
+    return res
+
+
+def stripclean(arr):
+    res = [s.strip().strip(punctuation) for s in arr]
+    return " ".join([i for i in res if i != ""])
+
+
+def dummy(x):
+    # stupid workaround to deep copy array cause i couldn't get it to work properly
+    return [s for s in x]
+
 
 class MCOCRDataset_from_list(MCOCRDataset):
-    def __init__(self, ls, pretrained_model, max_len):
+    def __init__(self, ls, pretrained_model, max_len, clean=False):
         self.is_train = False
         self.max_len = max_len
         self.df = pd.DataFrame.from_dict({"text": ls, "lbl": len(ls) * [0],})
+        if clean:
+            self.df["text"] = self.df["text"].apply(clean).str.split().apply(stripclean)
         self.tokenizer = AutoTokenizer.from_pretrained(pretrained_model)
 
 
