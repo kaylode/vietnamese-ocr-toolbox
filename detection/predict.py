@@ -73,7 +73,7 @@ def crop_box(img, boxes, image_name, out_folder, num_boxes=0, save_csv=True):
             matrix = cv2.getPerspectiveTransform(pt1,pt2)
             cropped = cv2.warpPerspective(img, matrix, (tw, th)) 
             box_names.append(box_name)
-            boxes.append([x1,y1,x2,y2])
+            boxes.append([x1,y1,x2,y2,x3,y3,x4,y4])
         else:
             cropped = img[min_y:max_y, min_x:max_x, :]
 

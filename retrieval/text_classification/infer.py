@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-sys.path.append("./libs/")
+sys.path.append("./retrieval/text_classification/libs/")
 
 from customdatasets import MCOCRDataset
 from torch.utils.data import DataLoader

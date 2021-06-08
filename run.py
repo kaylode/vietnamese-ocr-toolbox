@@ -1,6 +1,7 @@
 import os
 import cv2
 import argparse
+import torch
 import numpy as np
 import pandas as pd
 from PIL import Image
@@ -21,12 +22,43 @@ DETECTION_RES=f"{args.output}/detected.jpg"
 DETECTION_CSV_RES=f"{args.output}/box_info.csv"
 DETECTION_FOLDER_RES=f"{args.output}/crops"
 OCR_RES=f"{args.output}/ocr.txt"
+FINAL_RES=f"{args.output}/final.jpg"
 
 PAN_WEIGHT="/content/drive/MyDrive/AI Competitions/MC-OCR/checkpoints/detection-checkpoints/PANNet_best.pth"
 OCR_WEIGHT="/content/drive/MyDrive/AI Competitions/MC-OCR/checkpoints/ocr-checkpoints/transformerocr.pth"
 OCR_CONFIG="/content/drive/MyDrive/AI Competitions/MC-OCR/checkpoints/ocr-checkpoints/config.yml"
 BERT_WEIGHT="/content/drive/MyDrive/AI Competitions/MC-OCR/checkpoints/retrieval-checkpoints/phobert.pth"
 
+def visualize(img, boxes, texts, labels, probs, img_name):
+    """
+    Visualize an image with its bouding boxes
+    """
+
+    STANDARD_COLORS = [(255,0,0), (0,255,0), (0,0,255), (255,255,0)]
+    lbl_dict = {"SELLER":0, "ADDRESS":1, "TIMESTAMP":2, "TOTAL_COST":3}
+
+    fig,ax = plt.subplots(figsize=(8,8))
+
+    
+    # Create a Rectangle patch
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    for (box,text,label,prob) in zip(boxes,texts,labels,probs):
+        label_idx = lbl_dict[label]
+        color = STANDARD_COLORS[label_idx]
+        box = eval(box)
+        x1,y1,x2,y2,x3,y3,x4,y4 = box
+        box = np.array([(x1,y1),(x2,y2),(x3,y3),(x4,y4)])
+        img = detection.draw_bbox(img, [box], color=color)
+        score = np.round(float(prob), 3)
+        plt_text = f'{text}: {label} | {score}'
+        plt.text(x1, y1-3, plt_text, color = [i/255 for i in color], fontsize=10, weight="bold")
+    # Display the image
+    
+    ax.imshow(img)
+
+    plt.axis('off')
+    plt.savefig(img_name,bbox_inches='tight')
+    plt.close()
 
 if __name__ == "__main__":
 
@@ -75,11 +107,9 @@ if __name__ == "__main__":
         crop_region=True,
         save_csv=True)
     
-    detection.show_img(preds)
     img = detection.draw_bbox(cv2.imread(PREPROCESS_RES)[:, :, ::-1], boxes_list)
-    detection.show_img(img, color=True)
-    plt.axis('off')
-    plt.savefig(DETECTION_RES,bbox_inches='tight')
+    img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+    cv2.imwrite(DETECTION_RES, img)
 
     # OCR
     df = pd.read_csv(DETECTION_CSV_RES)
@@ -126,3 +156,9 @@ if __name__ == "__main__":
     df["probs"] = probs
 
     df.to_csv(DETECTION_CSV_RES, index=False)
+
+    # Visualize result
+
+    img = cv2.imread(DETECTION_RES)
+    visualize(img, df.boxes.tolist(), df.texts.tolist(), df.labels.tolist(), df.probs.tolist(), FINAL_RES)
+    
