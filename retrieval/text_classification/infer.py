@@ -38,11 +38,11 @@ def dummy(x):
 
 
 class MCOCRDataset_from_list(MCOCRDataset):
-    def __init__(self, ls, pretrained_model, max_len, clean=False):
+    def __init__(self, ls, pretrained_model, max_len, preproc=False):
         self.is_train = False
         self.max_len = max_len
         self.df = pd.DataFrame.from_dict({"text": ls, "lbl": len(ls) * [0],})
-        if clean:
+        if preproc:
             self.df["text"] = self.df["text"].apply(clean).str.split().apply(stripclean)
         self.tokenizer = AutoTokenizer.from_pretrained(pretrained_model)
 
@@ -85,7 +85,10 @@ if __name__ == "__main__":
     model.load_state_dict(model_state)
 
     dataset = MCOCRDataset_from_list(
-        inputs, pretrained_model=cfg["model"]["args"]["pretrained_model"], max_len=31,
+        inputs,
+        pretrained_model=cfg["model"]["args"]["pretrained_model"],
+        max_len=31,
+        preproc=True,
     )
     dataloader = DataLoader(
         dataset=dataset, batch_size=2, shuffle=False, pin_memory=False
