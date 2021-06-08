@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 from PIL import Image
 import matplotlib.pyplot as plt
+import matplotlib
 from preprocess import DocScanner
 import detection
 import ocr
@@ -27,7 +28,7 @@ FINAL_RES=f"{args.output}/final.jpg"
 PAN_WEIGHT="/content/drive/MyDrive/AI Competitions/MC-OCR/checkpoints/detection-checkpoints/PANNet_best.pth"
 OCR_WEIGHT="/content/drive/MyDrive/AI Competitions/MC-OCR/checkpoints/ocr-checkpoints/transformerocr.pth"
 OCR_CONFIG="/content/drive/MyDrive/AI Competitions/MC-OCR/checkpoints/ocr-checkpoints/config.yml"
-BERT_WEIGHT="/content/drive/MyDrive/AI Competitions/MC-OCR/checkpoints/retrieval-checkpoints/phobert.pth"
+BERT_WEIGHT="/content/drive/MyDrive/AI Competitions/MC-OCR/checkpoints/retrieval-checkpoints/phobert_report.pth"
 
 def visualize(img, boxes, texts, labels, probs, img_name):
     """
@@ -36,7 +37,10 @@ def visualize(img, boxes, texts, labels, probs, img_name):
     STANDARD_COLORS = [(255,0,0), (0,255,0), (0,0,255), (255,255,0)]
     lbl_dict = {"SELLER":0, "ADDRESS":1, "TIMESTAMP":2, "TOTAL_COST":3}
 
-
+    dpi = matplotlib.rcParams['figure.dpi']
+    # Determine the figures size in inches to fit your image
+    height, width, depth = img.shape
+    figsize = width / float(dpi), height / float(dpi)
 
     def find_highest_score_each_class(labels, probs):
         best_score = [0,0,0,0]
@@ -49,7 +53,7 @@ def visualize(img, boxes, texts, labels, probs, img_name):
         return best_idx
     
     best_score_idx = find_highest_score_each_class(labels, probs)
-    fig,ax = plt.subplots(figsize=(8,8))
+    fig,ax = plt.subplots(figsize=figsize)
     
     
     # Create a Rectangle patch
@@ -66,7 +70,7 @@ def visualize(img, boxes, texts, labels, probs, img_name):
         if i in best_score_idx:
             plt_text = f'{text}: {label} | {score}'
             plt.text(x1, y1-3, plt_text, color = [i/255 for i in color], fontsize=10, weight="bold")
-            
+
     # Display the image
     
     ax.imshow(img)
@@ -147,25 +151,38 @@ if __name__ == "__main__":
 
     # Information Retrieval
 
-    meta_data = torch.load(BERT_WEIGHT)
-    cfg = meta_data["config"]
-    model_state = meta_data["model_state_dict"]
-
-    retr_model = retrieval.get_instance(cfg["model"]).cuda()
-    retr_model.load_state_dict(model_state)
-
     inputs = df.texts.tolist()
-    dataset = retrieval.MCOCRDataset_from_list(
-        inputs, pretrained_model=cfg["model"]["args"]["pretrained_model"], max_len=31,
-    )
-    dataloader = torch.utils.data.DataLoader(
-        dataset=dataset, batch_size=2, shuffle=False, pin_memory=False
-    )
-
-    # Run
     lbl_dict = {0: "SELLER", 1: "ADDRESS", 2: "TIMESTAMP", 3: "TOTAL_COST"}
-    with torch.no_grad():
-        preds, probs = retrieval.inference(model=retr_model, dataloader=dataloader, device=torch.device("cuda:0"))
+
+    USE_BERT=True
+
+    if USE_BERT:
+        meta_data = torch.load(BERT_WEIGHT)
+        cfg = meta_data["config"]
+        model_state = meta_data["model_state_dict"]
+
+        retr_model = retrieval.get_instance(cfg["model"]).cuda()
+        retr_model.load_state_dict(model_state)
+
+        dataset = retrieval.MCOCRDataset_from_list(
+            inputs, pretrained_model=cfg["model"]["args"]["pretrained_model"], max_len=31,
+            preproc=True
+        )
+
+        dataloader = torch.utils.data.DataLoader(
+            dataset=dataset, batch_size=2, shuffle=False, pin_memory=False
+        )
+
+        with torch.no_grad():
+            preds, probs = retrieval.inference(model=retr_model, dataloader=dataloader, device=torch.device("cuda:0"))
+    else:
+        retr_df = pd.read_csv('./retrieval/heuristic/data-full-digit.csv')
+        retr_texts = {}
+        for id, row in retr_df.iterrows():
+            retr_texts[row.text.upper()] = row.lbl
+
+        inference = retrieval.get_heuristic_retrieval()
+        preds, probs = inference(inputs, lbl_dict,retr_texts)
 
     df["labels"] = [lbl_dict[x] for x in preds]
     df["probs"] = probs
@@ -173,7 +190,6 @@ if __name__ == "__main__":
     df.to_csv(DETECTION_CSV_RES, index=False)
 
     # Visualize result
-
     img = cv2.imread(DETECTION_RES)
     visualize(img, df.boxes.tolist(), df.texts.tolist(), df.labels.tolist(), df.probs.tolist(), FINAL_RES)
     
