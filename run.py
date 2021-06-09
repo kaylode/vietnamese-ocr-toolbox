@@ -89,18 +89,25 @@ def merge_result(df):
         if row["timestamp"] == 1:
             preds.append("TIMESTAMP")
             probs.append(1.0)
-        elif row["bert_labels"] == "ADDRESS" and row["diff_labels"] == "ADDRESS":
+        elif row["bert_labels"] == row["diff_labels"]:
             preds.append(row["bert_labels"])
             probs.append(row["bert_probs"] + row["diff_probs"])
-        elif row["bert_labels"] == "SELLER" and row["diff_labels"] == "SELLER":
-            preds.append(row["diff_labels"])
-            probs.append(row["bert_probs"] + row["diff_probs"])
-        elif row["bert_labels"] == "TOTAL_COST" and row["diff_labels"] == "TOTAL_COST":
+        elif row["bert_labels"] == row["trie_labels"]:
             preds.append(row["bert_labels"])
-            probs.append(row["bert_probs"] + row["diff_probs"])
+            probs.append(row["bert_probs"] + row["trie_labels"])
+        elif row["trie_labels"] == row["diff_labels"]:
+            preds.append(row["trie_labels"])
+            probs.append(row["trie_labels"] + row["diff_probs"])
         else:
-            preds.append(row["bert_labels"])
-            probs.append(row["bert_probs"])
+            if row["diff_probs"] >= 0.4:
+                preds.append(row["diff_labels"])
+                probs.append(row["diff_probs"])
+            elif row["trie_probs"] >= 0.25:
+                preds.append(row["trie_labels"])
+                probs.append(row["trie_probs"])
+            else:
+                preds.append(row["bert_labels"]/3)
+                probs.append(row["bert_probs"]/3)
 
     return preds, probs
 
