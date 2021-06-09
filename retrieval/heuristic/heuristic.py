@@ -46,7 +46,7 @@ def get_multiple_trie_match(texts, dictionary):
     for query_txt in texts:
         key, score = matcher.get_match(query_txt)
         if key is None or score ==0:
-            preds.append("NONE")
+            preds.append(4)
             probs.append(0.0)
         else:
             preds.append(dictionary[key])
@@ -67,14 +67,14 @@ def get_multiple_diff_match(texts, dictionary):
         if score != 0:
             preds.append(dictionary[key])
         else:
-            preds.append("NONE")
+            preds.append(4)
         probs.append(score)
     return preds, probs
 
 
 def regex_timestamp(texts):
     preds = []
-    time = r'\d{2}:\d{2}:\d{2}|\d{2}-\d{2}-\d{2}|\d{2}.\d{2}.\d{2}'
+    time = r'\d{2}:\d{2}:\d{2}|\d{2}-\d{2}-\d{2}|\d{2}\.\d{2}\.\d{2}'
     date = r'(\d+/\d+/\d+)'
     regex = '|'.join([time,date])
     for query_txt in texts:
