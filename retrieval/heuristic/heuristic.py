@@ -50,7 +50,7 @@ def get_multiple_trie_match(texts, dictionary):
             probs.append(0.0)
         else:
             preds.append(dictionary[key])
-            probs.append(score)
+            probs.append(score/len(key))
     return preds, probs
 
 def get_multiple_diff_match(texts, dictionary):
@@ -71,7 +71,7 @@ def get_multiple_diff_match(texts, dictionary):
 
 def regex_timestamp(texts):
     preds = []
-    time = r'\d{2}:\d{2}:\d{2}'
+    time = r'\d{2}:\d{2}:\d{2}|\d{2}-\d{2}-\d{2}'
     date = r'(\d+/\d+/\d+)'
     regex = '|'.join([time,date])
     for query_txt in texts:

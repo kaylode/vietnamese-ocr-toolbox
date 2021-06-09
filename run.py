@@ -89,9 +89,9 @@ def merge_result(df):
         if row["timestamp"] == 1:
             preds.append("TIMESTAMP")
             probs.append(1.0)
-        elif row["bert_labels"] == "ADDRESS":
+        elif row["bert_labels"] == "ADDRESS" and row["diff_labels"] == "ADDRESS":
             preds.append(row["bert_labels"])
-            probs.append(row["bert_probs"])
+            probs.append(row["bert_probs"] + row["diff_probs"])
         elif row["bert_labels"] == "SELLER" and row["diff_labels"] == "SELLER":
             preds.append(row["diff_labels"])
             probs.append(row["bert_probs"] + row["diff_probs"])
