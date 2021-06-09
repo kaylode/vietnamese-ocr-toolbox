@@ -13,7 +13,7 @@ class ImageDataset(Dataset):
 
         self.root_dir = images_dir
         self.data_list = self.load_data(ann_path)
-        self.train = True
+        self.train = train
         self.input_size = input_size
         self.img_channel = img_channel
         self.transform = transform

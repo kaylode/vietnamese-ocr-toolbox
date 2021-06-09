@@ -30,14 +30,14 @@ OCR_WEIGHT="/content/drive/MyDrive/AI Competitions/MC-OCR/checkpoints/ocr-checkp
 OCR_CONFIG="/content/drive/MyDrive/AI Competitions/MC-OCR/checkpoints/ocr-checkpoints/config.yml"
 BERT_WEIGHT="/content/drive/MyDrive/AI Competitions/MC-OCR/checkpoints/retrieval-checkpoints/phobert_report.pth"
 
-LABEL_TO_IDX = {"SELLER":0, "ADDRESS":1, "TIMESTAMP":2, "TOTAL_COST":3}
-IDX_TO_LABEL = {0: "SELLER", 1: "ADDRESS", 2: "TIMESTAMP", 3: "TOTAL_COST"}
+LABEL_TO_IDX = {"SELLER":0, "ADDRESS":1, "TIMESTAMP":2, "TOTAL_COST":3, "NONE":4}
+IDX_TO_LABEL = {0: "SELLER", 1: "ADDRESS", 2: "TIMESTAMP", 3: "TOTAL_COST", 4:"NONE"}
 
 def visualize(img, boxes, texts, labels, probs, img_name):
     """
     Visualize an image with its bouding boxes
     """
-    STANDARD_COLORS = [(255,0,0), (0,255,0), (0,0,255), (255,255,0)]
+    STANDARD_COLORS = [(255,0,0), (0,255,0), (0,0,255), (255,255,0), (0,0,0)]
 
     dpi = matplotlib.rcParams['figure.dpi']
     # Determine the figures size in inches to fit your image
@@ -49,9 +49,10 @@ def visualize(img, boxes, texts, labels, probs, img_name):
         best_idx = [-1,-1,-1,-1]
         for i, (label, prob) in enumerate(zip(labels, probs)):
             label_idx = LABEL_TO_IDX[label]
-            if prob > best_score[label_idx]:
-                best_score[label_idx] = prob
-                best_idx[label_idx] = i
+            if label_idx != 4:
+                if prob > best_score[label_idx]:
+                    best_score[label_idx] = prob
+                    best_idx[label_idx] = i
         return best_idx
     
     best_score_idx = find_highest_score_each_class(labels, probs)
@@ -94,10 +95,10 @@ def merge_result(df):
             probs.append(row["bert_probs"] + row["diff_probs"])
         elif row["bert_labels"] == row["trie_labels"]:
             preds.append(row["bert_labels"])
-            probs.append(row["bert_probs"] + row["trie_labels"])
+            probs.append(row["bert_probs"] + row["trie_probs"])
         elif row["trie_labels"] == row["diff_labels"]:
             preds.append(row["trie_labels"])
-            probs.append(row["trie_labels"] + row["diff_probs"])
+            probs.append(row["trie_probs"] + row["diff_probs"])
         else:
             if row["diff_probs"] >= 0.4:
                 preds.append(row["diff_labels"])
@@ -106,7 +107,7 @@ def merge_result(df):
                 preds.append(row["trie_labels"])
                 probs.append(row["trie_probs"])
             else:
-                preds.append(row["bert_labels"]/3)
+                preds.append(row["bert_labels"])
                 probs.append(row["bert_probs"]/3)
 
     return preds, probs
