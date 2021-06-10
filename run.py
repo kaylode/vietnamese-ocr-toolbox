@@ -213,10 +213,10 @@ if __name__ == "__main__":
     df["bert_probs"] = probs
 
     ## HEURISTICS
-    retr_df = pd.read_csv('./retrieval/heuristic/data-full-digit.csv')
+    retr_df = pd.read_csv('./retrieval/heuristic/custom-dictionary.csv')
     retr_texts = {}
     for id, row in retr_df.iterrows():
-        retr_texts[row.text.upper()] = row.lbl
+        retr_texts[row.text.lower()] = row.lbl
 
     inference = retrieval.get_heuristic_retrieval('diff')
     preds, probs = inference(inputs,retr_texts)

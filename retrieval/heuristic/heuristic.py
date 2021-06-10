@@ -44,7 +44,7 @@ def get_multiple_trie_match(texts, dictionary):
     probs = []
     matcher = Matcher(dictionary)
     for query_txt in texts:
-        key, score = matcher.get_match(query_txt)
+        key, score = matcher.get_match(query_txt.lower())
         if key is None or score ==0:
             preds.append(4)
             probs.append(0.0)
@@ -61,7 +61,7 @@ def get_multiple_diff_match(texts, dictionary):
     probs = []
 
     for query_txt in texts:
-        dis_list = [(key, sentence_distance(query_txt, key)) for key in dictionary.keys()]
+        dis_list = [(key, sentence_distance(query_txt.lower(), key)) for key in dictionary.keys()]
         dis_list = sorted(dis_list,key=lambda tup: tup[1],reverse=True)[:5]
         key, score = dis_list[0]
         if score != 0:
