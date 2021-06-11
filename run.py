@@ -11,6 +11,7 @@ from preprocess import DocScanner
 import detection
 import ocr
 import retrieval
+from tool.config import Config 
 
 parser = argparse.ArgumentParser("Document Extraction")
 parser.add_argument("--input", help="Path to single image to be scanned")
@@ -123,7 +124,7 @@ if __name__ == "__main__":
     scanner.scan(args.input, PREPROCESS_RES)
 
     # Text detection model + OCR model config
-    det_config = detection.Config("tool/config/detection/configs.yaml")
+    det_config = Config("tool/config/detection/configs.yaml")
     os.environ['CUDA_VISIBLE_DEVICES'] = det_config.gpu_devices
     ocr_config = ocr.Config.load_config_from_file(OCR_CONFIG)
     ocr_config['weights'] = OCR_WEIGHT

@@ -6,7 +6,7 @@ import time
 import numpy as np
 import pandas as pd
 from detection.models import get_model
-from detection.config import Config
+from tool.config import Config
 from detection.utils.util import order_points_clockwise
 from detection.post_processing import decode_clip
 import argparse
@@ -63,8 +63,8 @@ def crop_box(img, boxes, image_name, out_folder, num_boxes=0, save_csv=True):
         max_y = min(h, max(y1,y2,y3,y4))
         
         if num_boxes==0:
-            tw = max_x - min_x
-            th = max_y - min_y
+            tw = np.sqrt((x1-x2)**2 + (y1-y2)**2)
+            th = np.sqrt((x1-x4)**2 + (y1-y4)**2)
             pt1 = np.float32([(x1,y1),(x2,y2),(x3,y3),(x4,y4)])
             pt2 = np.float32([[0, 0],
                               [tw - 1, 0],
