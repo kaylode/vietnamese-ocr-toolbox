@@ -1,6 +1,7 @@
 from collections import defaultdict
 import difflib
 import re
+import math
 
 class TrieNode:
     def __init__(self):
@@ -45,7 +46,7 @@ def get_multiple_trie_match(texts, dictionary):
     matcher = Matcher(dictionary)
     for query_txt in texts:
         key, score = matcher.get_match(query_txt.lower())
-        if key is None or score ==0:
+        if key is None or score ==0 or math.isnan(score):
             preds.append(4)
             probs.append(0.0)
         else:
@@ -64,7 +65,7 @@ def get_multiple_diff_match(texts, dictionary):
         dis_list = [(key, sentence_distance(query_txt.lower(), key)) for key in dictionary.keys()]
         dis_list = sorted(dis_list,key=lambda tup: tup[1],reverse=True)[:5]
         key, score = dis_list[0]
-        if score != 0:
+        if score != 0 and not math.isnan(score):
             preds.append(dictionary[key])
         else:
             preds.append(4)

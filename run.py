@@ -89,7 +89,7 @@ def merge_result(df):
     for id, row in df.iterrows():
         if row["timestamp"] == 1:
             preds.append("TIMESTAMP")
-            probs.append(1.0)
+            probs.append(5.0)
         elif row["bert_labels"] == row["diff_labels"]:
             preds.append(row["bert_labels"])
             probs.append(row["bert_probs"] + row["diff_probs"])
