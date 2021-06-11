@@ -123,7 +123,7 @@ if __name__ == "__main__":
     scanner.scan(args.input, PREPROCESS_RES)
 
     # Text detection model + OCR model config
-    det_config = detection.Config(os.path.join('detection', 'config','configs.yaml'))
+    det_config = detection.Config("tool/config/detection/configs.yaml")
     os.environ['CUDA_VISIBLE_DEVICES'] = det_config.gpu_devices
     ocr_config = ocr.Config.load_config_from_file(OCR_CONFIG)
     ocr_config['weights'] = OCR_WEIGHT
