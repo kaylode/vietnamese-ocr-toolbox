@@ -1,0 +1,18 @@
+#################   DATASET CONFIG   ###################
+
+
+project_name: "mcocr"
+data_root: "data/ocr_data/"
+train_annotation: "train_annotation.txt"
+valid_annotation: "val_annotation.txt"
+
+print_every: 100
+valid_every: 500
+iters: 20000
+export: "./weights/transformerocr.pth"
+
+
+#################   TRAINING CONFIG   ###################
+
+gpu_devices: "cuda:0"
+model_name: "vgg-transformer"
