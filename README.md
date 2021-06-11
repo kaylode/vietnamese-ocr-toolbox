@@ -38,12 +38,14 @@ python predict.py -i=<input folder> -o=<output txt> -w=<ocr model's checkpoint> 
 ```
 
 - Full pipeline:
-  - Declare ```image name``` and run
 ```
-sh run.sh
+python run.py --input=<input image> --output=<output folder>
 ```
 
 ## References
 - https://github.com/WenmuZhou/PAN.pytorch
 - https://github.com/andrewdcampbell/OpenCV-Document-Scanner
 - https://github.com/pbcquoc/vietocr
+
+## Pipeline
+![Alt Text](fullpipeline.PNG)
