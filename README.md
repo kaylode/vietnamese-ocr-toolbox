@@ -1,10 +1,14 @@
 # Vietnamese Receipt Reader 
 
 ## Pipeline
-1. Use Canny Edge Detector and then detect contours to extract receipt from the image.
-2. Use Pixel Agreation Network (PAN) to detect text regions from extracted receipt, then crop these regions.
-3. Use VietOCR to extract texts from regions.
-4. Retrieve information
+
+![Alt Text](fullpipeline.PNG)
+
+1. Use Canny Edge Detector and then detect contours.
+2. Extract receipt from image and normalize.
+3. Use Pixel Agreation Network (PAN) to detect text regions from extracted receipt, then crop these regions.
+4. Use VietOCR to extract texts from regions.
+5. Retrieve information
 
 ## Datasets
 - [MCOCR-2020](https://drive.google.com/file/d/1cyEGMVcEkquduJp3ewGq9Q4SyliX0bfB/view?usp=sharing)
@@ -47,5 +51,3 @@ python run.py --input=<input image> --output=<output folder>
 - https://github.com/andrewdcampbell/OpenCV-Document-Scanner
 - https://github.com/pbcquoc/vietocr
 
-## Pipeline
-![Alt Text](fullpipeline.PNG)
