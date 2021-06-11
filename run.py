@@ -125,7 +125,7 @@ if __name__ == "__main__":
     # Text detection model + OCR model config
     det_config = detection.Config(os.path.join('detection', 'config','configs.yaml'))
     os.environ['CUDA_VISIBLE_DEVICES'] = det_config.gpu_devices
-    ocr_config = ocr.Cfg.load_config_from_file(OCR_CONFIG)
+    ocr_config = ocr.Config.load_config_from_file(OCR_CONFIG)
     ocr_config['weights'] = OCR_WEIGHT
     ocr_config['cnn']['pretrained']=False
     ocr_config['device'] = 'cuda:0'
