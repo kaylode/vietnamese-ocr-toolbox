@@ -1,7 +1,7 @@
-from vietocr.tool.config import Cfg
-from vietocr.model.trainer import Trainer
+from tool.config import Cfg
+from model.trainer import Trainer
 from params import *
-from vietocr.tool.predictor import Predictor
+from tool.predictor import Predictor
 
 
 config = Cfg.load_config_from_name("vgg_transformer")
