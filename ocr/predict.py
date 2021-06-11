@@ -2,8 +2,8 @@ import os
 import re
 from PIL import Image
 import numpy as np
-from tool.predictor import Predictor
-from tool.config import Cfg
+from ocr.tool.predictor import Predictor
+from ocr.tool.config import Cfg
 import argparse
 
 def natural_keys(text):
