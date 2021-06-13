@@ -95,7 +95,7 @@ def crop_box(img, boxes, out_folder, num_boxes=0, save_csv=True):
         df = pd.DataFrame(data)
         df.to_csv(os.path.join(out_dir, "box_info.csv"), index=False)
 
-
+    return sorted_boxes
 
 class PAN:
     def __init__(self, config, model_path=None, state_dict=None):
@@ -145,7 +145,7 @@ class PAN:
 
         if crop_region:
             os.makedirs(output_dir, exist_ok=True)
-            crop_box(img, boxes_list, output_dir, num_boxes=num_boxes, save_csv=save_csv)
+            boxes_list = crop_box(img, boxes_list, output_dir, num_boxes=num_boxes, save_csv=save_csv)
         return preds, boxes_list, t
 
 

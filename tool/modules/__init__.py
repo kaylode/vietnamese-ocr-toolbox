@@ -178,7 +178,7 @@ class Retrieval:
             self.use_ed = True
 
         if self.use_bert:
-            self.bert = retrieval.PhoBERT(idx_mapping, bert_weight)
+            self.bert = retrieval.PhoBERT(self.idx_mapping, bert_weight)
         if self.use_ed:
             self.ed = retrieval.get_heuristic_retrieval('diff')
         if self.use_trie:
@@ -222,11 +222,11 @@ class Retrieval:
             df["bert_probs"] = probs
         if self.use_ed:
             preds, probs = self.ed(query_texts, dictionary)
-            df["diff_labels"] = preds
+            df["diff_labels"] = [self.idx_mapping[x] for x in preds]
             df["diff_probs"] = probs
         if self.use_trie:
             preds, probs = self.trie(query_texts, dictionary)
-            df["trie_labels"] = preds
+            df["trie_labels"] = [self.idx_mapping[x] for x in preds]
             df["trie_probs"] = probs
 
         timestamps = retrieval.regex_timestamp(query_texts)

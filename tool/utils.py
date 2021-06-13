@@ -1,6 +1,11 @@
 import gdown
 import re
-
+import cv2
+import numpy as np
+import webcolors
+import matplotlib
+import matplotlib.pyplot as plt
+from detection import draw_bbox
 def download_weights(id_or_url, cached=None, md5=None, quiet=False):
     if id_or_url.startswith('http'):
         url = id_or_url
@@ -32,3 +37,100 @@ def natural_keys(text):
         return int(text) if text.isdigit() else text
 
     return [ atoi(c) for c in re.split(r'(\d+)', text) ]
+
+
+STANDARD_COLORS = [
+    'LawnGreen', 'LightBlue' , 'Crimson', 'Gold', 'Azure', 'BlanchedAlmond', 'Bisque',
+    'Aquamarine', 'BlueViolet', 'BurlyWood', 'CadetBlue', 'AntiqueWhite',
+    'Chocolate', 'Coral', 'CornflowerBlue', 'Cornsilk', 'Crimson', 'Cyan',
+    'DarkCyan', 'DarkGoldenRod', 'DarkGrey', 'DarkKhaki', 'DarkOrange',
+    'DarkOrchid', 'DarkSalmon', 'DarkSeaGreen', 'DarkTurquoise', 'DarkViolet',
+    'DeepPink', 'DeepSkyBlue', 'DodgerBlue', 'FireBrick', 'FloralWhite',
+    'ForestGreen', 'Fuchsia', 'Gainsboro', 'GhostWhite', 'Gold', 'GoldenRod',
+    'Salmon', 'Tan', 'HoneyDew', 'HotPink', 'IndianRed', 'Ivory', 'Khaki',
+    'Lavender', 'LavenderBlush', 'AliceBlue', 'LemonChiffon', 'LightBlue',
+    'LightCoral', 'LightCyan', 'LightGoldenRodYellow', 'LightGray', 'LightGrey',
+    'LightGreen', 'LightPink', 'LightSalmon', 'LightSeaGreen', 'LightSkyBlue',
+    'LightSlateGray', 'LightSlateGrey', 'LightSteelBlue', 'LightYellow', 'Lime',
+    'LimeGreen', 'Linen', 'Magenta', 'MediumAquaMarine', 'MediumOrchid',
+    'MediumPurple', 'MediumSeaGreen', 'MediumSlateBlue', 'MediumSpringGreen',
+    'MediumTurquoise', 'MediumVioletRed', 'MintCream', 'MistyRose', 'Moccasin',
+    'NavajoWhite', 'OldLace', 'Olive', 'OliveDrab', 'Orange', 'OrangeRed',
+    'Orchid', 'PaleGoldenRod', 'PaleGreen', 'PaleTurquoise', 'PaleVioletRed',
+    'PapayaWhip', 'PeachPuff', 'Peru', 'Pink', 'Plum', 'PowderBlue', 'Purple',
+    'Red', 'RosyBrown', 'RoyalBlue', 'SaddleBrown', 'Green', 'SandyBrown',
+    'SeaGreen', 'SeaShell', 'Sienna', 'Silver', 'SkyBlue', 'SlateBlue',
+    'SlateGray', 'SlateGrey', 'Snow', 'SpringGreen', 'SteelBlue', 'GreenYellow',
+    'Teal', 'Thistle', 'Tomato', 'Turquoise', 'Violet', 'Wheat', 'White',
+    'WhiteSmoke', 'Yellow', 'YellowGreen'
+]
+
+def from_colorname_to_bgr(color):
+    rgb_color = webcolors.name_to_rgb(color)
+    result = (rgb_color.blue, rgb_color.green, rgb_color.red)
+    return result
+
+def standard_to_bgr(list_color_name):
+    standard = []
+    for i in range(len(list_color_name) - 36):  # -36 used to match the len(obj_list)
+        standard.append(from_colorname_to_bgr(list_color_name[i]))
+    return standard
+
+color_list = standard_to_bgr(STANDARD_COLORS)
+
+def visualize(
+        img, 
+        boxes, 
+        texts, 
+        labels, 
+        probs, 
+        img_name, 
+        class_mapping,
+        visualize_best=True):
+
+    """
+    Visualize an image with its bouding boxes
+    """
+    
+    dpi = matplotlib.rcParams['figure.dpi']
+    # Determine the figures size in inches to fit your image
+    height, width, depth = img.shape
+    figsize = width / float(dpi), height / float(dpi)
+
+    def find_highest_score_each_class(labels, probs):
+        best_score = [0] * len(class_mapping.keys())
+        best_idx = [-1] * len(class_mapping.keys())
+        for i, (label, prob) in enumerate(zip(labels, probs)):
+            label_idx = class_mapping[label]
+            if label_idx != class_mapping["NONE"]:
+                if prob > best_score[label_idx]:
+                    best_score[label_idx] = prob
+                    best_idx[label_idx] = i
+        return best_idx
+    
+    best_score_idx = find_highest_score_each_class(labels, probs)
+    fig,ax = plt.subplots(figsize=figsize)
+    
+    
+    # Create a Rectangle patch
+    img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+    for i, (box,text,label,prob) in enumerate(zip(boxes,texts,labels,probs)):
+        label_idx = class_mapping[label]
+        color = color_list[label_idx]
+        (x1,y1),(x2,y2),(x3,y3),(x4,y4) = box
+        box = np.array([(x1,y1),(x2,y2),(x3,y3),(x4,y4)])
+        img = draw_bbox(img, [box], color=color)
+        score = np.round(float(prob), 3)
+
+        if i in best_score_idx:
+            plt_text = f'{text}: {label} | {score}'
+            plt.text(x1, y1-3, plt_text, color = [i/255 for i in color], fontsize=10, weight="bold")
+
+    # Display the image
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    
+    ax.imshow(img)
+
+    plt.axis('off')
+    plt.savefig(img_name,bbox_inches='tight')
+    plt.close()
