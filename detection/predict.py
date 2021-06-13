@@ -36,13 +36,9 @@ def line_intersection(line1, line2):
     y = det(d, ydiff) / div
     return x, y
 
-def crop_box(img, boxes, out_folder, num_boxes=0, save_csv=True):
+def crop_box(img, boxes, out_folder):
     h,w,c = img.shape
     sorted_boxes = sort_box(boxes)
-
-    if save_csv:
-        boxes = []
-        box_names = []
 
     for i, box in enumerate(sorted_boxes):
         box_name = os.path.join(out_folder, f"{i}.jpg")
@@ -62,38 +58,20 @@ def crop_box(img, boxes, out_folder, num_boxes=0, save_csv=True):
         max_x = min(w, max(x1,x2,x3,x4))
         max_y = min(h, max(y1,y2,y3,y4))
         
-        if num_boxes==0:
-            tw = int(np.sqrt((x1-x2)**2 + (y1-y2)**2))
-            th = int(np.sqrt((x1-x4)**2 + (y1-y4)**2))
-            pt1 = np.float32([(x1,y1),(x2,y2),(x3,y3),(x4,y4)])
-            pt2 = np.float32([[0, 0],
-                              [tw - 1, 0],
-                              [tw - 1, th - 1],
-                              [0, th - 1]])
-            matrix = cv2.getPerspectiveTransform(pt1,pt2)
-            cropped = cv2.warpPerspective(img, matrix, (tw, th)) 
-        if save_csv:
-            box_names.append(box_name)
-            boxes.append([x1,y1,x2,y2,x3,y3,x4,y4])
-        else:
-            cropped = img[min_y:max_y, min_x:max_x, :]
-
+        tw = int(np.sqrt((x1-x2)**2 + (y1-y2)**2))
+        th = int(np.sqrt((x1-x4)**2 + (y1-y4)**2))
+        pt1 = np.float32([(x1,y1),(x2,y2),(x3,y3),(x4,y4)])
+        pt2 = np.float32([[0, 0],
+                            [tw - 1, 0],
+                            [tw - 1, th - 1],
+                            [0, th - 1]])
+        matrix = cv2.getPerspectiveTransform(pt1,pt2)
+        cropped = cv2.warpPerspective(img, matrix, (tw, th)) 
+        
         try:
             cv2.imwrite(box_name, cropped)
         except:
             print(box_name, " is missing")
-        
-        if num_boxes>0 and i == num_boxes-1:
-            break
-
-    if save_csv:
-        data = {
-            "box_names": box_names,
-            "boxes": boxes
-        }
-        out_dir = os.path.dirname(out_folder)
-        df = pd.DataFrame(data)
-        df.to_csv(os.path.join(out_dir, "box_info.csv"), index=False)
 
     return sorted_boxes
 
@@ -115,15 +93,14 @@ class PAN:
             img, 
             output_dir:str =None, 
             short_size: int = 736, 
-            crop_region: bool =False, 
-            num_boxes: int =0, 
-            save_csv: bool = True):
+            crop_region: bool =False):
 
         """
             Image needs to be in RGB channel
         """
         
-        h, w = img.shape[:2]
+        ori_img = img.copy()
+        h, w = ori_img.shape[:2]
         scale = short_size / min(h, w)
         img = cv2.resize(img, None, fx=scale, fy=scale)
 
@@ -145,7 +122,7 @@ class PAN:
 
         if crop_region:
             os.makedirs(output_dir, exist_ok=True)
-            boxes_list = crop_box(img, boxes_list, output_dir, num_boxes=num_boxes, save_csv=save_csv)
+            boxes_list = crop_box(ori_img, boxes_list, output_dir)
         return preds, boxes_list, t
 
 

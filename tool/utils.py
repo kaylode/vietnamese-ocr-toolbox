@@ -40,7 +40,7 @@ def natural_keys(text):
 
 
 STANDARD_COLORS = [
-    'LawnGreen', 'LightBlue' , 'Crimson', 'Gold', 'Azure', 'BlanchedAlmond', 'Bisque',
+    'Crimson', 'LawnGreen' , 'DeepSkyBlue', 'Gold', 'Azure', 'BlanchedAlmond', 'Bisque',
     'Aquamarine', 'BlueViolet', 'BurlyWood', 'CadetBlue', 'AntiqueWhite',
     'Chocolate', 'Coral', 'CornflowerBlue', 'Cornsilk', 'Crimson', 'Cyan',
     'DarkCyan', 'DarkGoldenRod', 'DarkGrey', 'DarkKhaki', 'DarkOrange',
@@ -124,7 +124,7 @@ def visualize(
 
         if i in best_score_idx:
             plt_text = f'{text}: {label} | {score}'
-            plt.text(x1, y1-3, plt_text, color = [i/255 for i in color], fontsize=10, weight="bold")
+            plt.text(x1, y1-3, plt_text, color = [i/255 for i in color][::-1], fontsize=10, weight="bold")
 
     # Display the image
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
