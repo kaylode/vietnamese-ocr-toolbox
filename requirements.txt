@@ -13,3 +13,4 @@ lmdb==1.0.0
 transformers==4.6.1
 torchnet
 gdown==3.13.0
+webcolors
