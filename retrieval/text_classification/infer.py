@@ -4,7 +4,7 @@ import pandas as pd
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
+from tool.utils import download_pretrained_weights
 sys.path.append("./retrieval/text_classification/libs/")
 
 from customdatasets import MCOCRDataset
@@ -16,6 +16,7 @@ from utils.getter import get_instance
 from string import punctuation
 import re
 
+CACHE_DIR ='.cache'
 
 def clean(s):
     res = re.sub(r"(\w)(\()(\w)", "\g<1> \g<2>\g<3>", s)
@@ -62,6 +63,43 @@ def inference(model, dataloader, device):
     preds = np.concatenate(preds, axis=0)
 
     return np.argmax(preds, 1), np.max(preds, 1)
+
+
+class PhoBERT:
+    def __init__(self, idx_mapping, weight_path=None):
+        self.idx_mapping = idx_mapping
+        if weight_path is None:
+            tmp_path = os.path.join(CACHE_DIR, 'bert_weight.pth')
+            download_pretrained_weights("phobert_mcocr", tmp_path)
+            weight_path = tmp_path
+        meta_data = torch.load(weight_path)
+        self.cfg = meta_data["config"]
+        model_state = meta_data["model_state_dict"]
+
+        self.model = get_instance(self.cfg["model"]).cuda()
+        self.model.load_state_dict(model_state)
+    
+    def __call__(self, texts):
+        dataset = MCOCRDataset_from_list(
+            texts, 
+            pretrained_model=self.cfg["model"]["args"]["pretrained_model"], 
+            max_len=31,
+            preproc=True
+        )
+
+        dataloader = torch.utils.data.DataLoader(
+            dataset=dataset, batch_size=2, shuffle=False, pin_memory=False
+        )
+
+        with torch.no_grad():
+            preds, probs = inference(
+                model=self.model, 
+                dataloader=dataloader, 
+                device=torch.device("cuda:0"))
+
+
+        labels = [self.idx_mapping[x] for x in preds]
+        return labels, probs
 
 
 if __name__ == "__main__":

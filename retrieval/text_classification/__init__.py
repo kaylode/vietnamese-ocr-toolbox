@@ -1,1 +1,1 @@
-from .infer import MCOCRDataset_from_list, inference, get_instance, stripclean, clean
+from .infer import PhoBERT

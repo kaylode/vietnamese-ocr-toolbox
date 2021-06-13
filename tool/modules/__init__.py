@@ -16,7 +16,7 @@ from tool.config import Config
 from tool.utils import download_pretrained_weights
 
 
-CACHE_DIR = 'tmp'
+CACHE_DIR = '.cache'
 
 class Preprocess:
     def __init__(
@@ -110,7 +110,7 @@ class Detection:
             save_csv=save_csv)
 
         if return_result:
-            img = detection.draw_bbox(image[:, :, ::-1], boxes_list)
+            img = detection.draw_bbox(image, boxes_list)
         
         if return_result:
             return boxes_list, img
@@ -158,3 +158,80 @@ class OCR:
         else:
             return texts
 
+class Retrieval:
+    def __init__(self, class_mapping, mode="all", bert_weight=None):
+        assert mode in ["all", "bert", "trie", "ed"], "Mode is not supported"
+        self.mode = mode
+
+        self.class_mapping = class_mapping
+        self.idx_mapping = {v:k for k,v in class_mapping.items()}
+
+        if self.mode == 'bert':
+            self.use_bert = True
+        if self.mode == 'trie':
+            self.use_trie = True
+        if self.mode == 'ed':
+            self.use_ed = True
+        if self.mode == 'all':
+            self.use_bert = True
+            self.use_trie = True
+            self.use_ed = True
+
+        if self.use_bert:
+            self.bert = retrieval.PhoBERT(idx_mapping, bert_weight)
+        if self.use_ed:
+            self.ed = retrieval.get_heuristic_retrieval('diff')
+        if self.use_trie:
+            self.trie = retrieval.get_heuristic_retrieval('trie')
+    
+    def ensemble(self, df):
+        preds = []
+        probs = []
+
+        for id, row in df.iterrows():
+            if row["timestamp"] == 1:
+                preds.append("TIMESTAMP")
+                probs.append(5.0)
+            elif row["bert_labels"] == row["diff_labels"]:
+                preds.append(row["bert_labels"])
+                probs.append(row["bert_probs"] + row["diff_probs"])
+            elif row["bert_labels"] == row["trie_labels"]:
+                preds.append(row["bert_labels"])
+                probs.append(row["bert_probs"] + row["trie_probs"])
+            elif row["trie_labels"] == row["diff_labels"]:
+                preds.append(row["trie_labels"])
+                probs.append(row["trie_probs"] + row["diff_probs"])
+            else:
+                if row["diff_probs"] >= 0.4:
+                    preds.append(row["diff_labels"])
+                    probs.append(row["diff_probs"])
+                elif row["trie_probs"] >= 0.25:
+                    preds.append(row["trie_labels"])
+                    probs.append(row["trie_probs"])
+                else:
+                    preds.append(row["bert_labels"])
+                    probs.append(row["bert_probs"]/3)
+
+        return preds, probs
+
+    def __call__(self, query_texts, dictionary=None):
+        df = pd.DataFrame()
+        if self.use_bert:
+            preds, probs = self.bert(query_texts)
+            df["bert_labels"] = preds
+            df["bert_probs"] = probs
+        if self.use_ed:
+            preds, probs = self.ed(query_texts, dictionary)
+            df["diff_labels"] = preds
+            df["diff_probs"] = probs
+        if self.use_trie:
+            preds, probs = self.trie(query_texts, dictionary)
+            df["trie_labels"] = preds
+            df["trie_probs"] = probs
+
+        timestamps = retrieval.regex_timestamp(query_texts)
+        df["timestamp"] = timestamps
+        preds, probs = self.ensemble(df)
+        return preds, probs
+
+        
