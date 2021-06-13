@@ -15,4 +15,4 @@ export: "./weights/transformerocr.pth"
 #################   TRAINING CONFIG   ###################
 
 gpu_devices: "cuda:0"
-model_name: "vgg-transformer"
+model_name: "vgg_transformer"
