@@ -83,7 +83,6 @@ class Detection:
         self, 
         image,
         crop_region=False,
-        save_csv=False,
         return_result=False,
         output_path=None):
         
@@ -93,7 +92,6 @@ class Detection:
         """
 
         if output_path is None:
-            assert save_csv, "Please specify output_path"
             assert crop_region, "Please specify output_path"
         else:
             output_path = os.path.join(output_path, 'crops')
@@ -106,8 +104,7 @@ class Detection:
         _, boxes_list, _ = self.model.predict(
             image, 
             output_path, 
-            crop_region=crop_region,
-            save_csv=save_csv)
+            crop_region=crop_region)
 
         if return_result:
             img = detection.draw_bbox(image, boxes_list)

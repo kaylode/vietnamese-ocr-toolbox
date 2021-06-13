@@ -40,10 +40,10 @@ def natural_keys(text):
 
 
 STANDARD_COLORS = [
-    'Crimson', 'LawnGreen' , 'DeepSkyBlue', 'Gold', 'Azure', 'BlanchedAlmond', 'Bisque',
+    'Crimson', 'LawnGreen' , 'DeepSkyBlue', 'Gold', 'DarkGrey', 'BlanchedAlmond', 'Bisque',
     'Aquamarine', 'BlueViolet', 'BurlyWood', 'CadetBlue', 'AntiqueWhite',
     'Chocolate', 'Coral', 'CornflowerBlue', 'Cornsilk', 'Crimson', 'Cyan',
-    'DarkCyan', 'DarkGoldenRod', 'DarkGrey', 'DarkKhaki', 'DarkOrange',
+    'DarkCyan', 'DarkGoldenRod', 'Azure', 'DarkKhaki', 'DarkOrange',
     'DarkOrchid', 'DarkSalmon', 'DarkSeaGreen', 'DarkTurquoise', 'DarkViolet',
     'DeepPink', 'DeepSkyBlue', 'DodgerBlue', 'FireBrick', 'FloralWhite',
     'ForestGreen', 'Fuchsia', 'Gainsboro', 'GhostWhite', 'Gold', 'GoldenRod',
