@@ -164,7 +164,7 @@ class DocScanner(object):
             and self.angle_range(cnt) < self.MAX_QUAD_ANGLE_RANGE)
 
 
-    def get_contour(self, rescaled_image, output_path):
+    def get_contour(self, rescaled_image, output_path=None):
         """
         Returns a numpy array of shape (4, 2) containing the vertices of the four corners
         of the document in the image. It considers the corners returned from get_corners()
@@ -189,9 +189,10 @@ class DocScanner(object):
         dilated = cv2.morphologyEx(gray, cv2.MORPH_CLOSE, kernel)
 
         # find edges and mark them in the output map using the Canny algorithm
-        canny_out = output_path[:-4] + '_canny.jpg'
         edged = cv2.Canny(dilated, 0, CANNY)
-        cv2.imwrite(canny_out, edged)
+        if output_path is not None:
+            canny_out = output_path[:-4] + '_canny.jpg'
+            cv2.imwrite(canny_out, edged)
         test_corners = self.get_corners(edged)
 
         approx_contours = []
@@ -248,7 +249,7 @@ class DocScanner(object):
             
         return screenCnt.reshape(4, 2)
 
-    def scan(self, image_path, output_path, binary=False):
+    def scan(self, image_path, output_path=None, binary=False):
 
         RESCALED_HEIGHT = 500.0
 
@@ -277,15 +278,13 @@ class DocScanner(object):
             sharpen = cv2.addWeighted(gray, 1.5, sharpen, -0.5, 0)
 
             # apply adaptive threshold to get black and white effect
-            thresh = cv2.adaptiveThreshold(sharpen, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 21, 15)
+            warped = cv2.adaptiveThreshold(sharpen, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 21, 15)
 
-            # save the transformed image
-            cv2.imwrite(output_path, thresh)
-        
-        else:
+        if output_path is not None:
             # save the transformed image
             cv2.imwrite(output_path, warped)
-
+        else:
+            return warped
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("Document Extraction")

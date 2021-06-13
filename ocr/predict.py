@@ -28,10 +28,11 @@ def find_rotation_score(img, detector):
     return np.array(scores)
 
 def rotate_img(img, orient):
+    new_img = img.copy()
     for i in range(orient):
-        img = img.transpose(Image.ROTATE_90)
+        new_img = cv2.rotate(new_img, cv2.ROTATE_90_CLOCKWISE)
     
-    return img
+    return new_img
     
 
 def main(config, args):
