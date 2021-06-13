@@ -249,14 +249,13 @@ class DocScanner(object):
             
         return screenCnt.reshape(4, 2)
 
-    def scan(self, image_path, output_path=None, binary=False):
+    def scan(self, image, output_path=None, binary=False):
 
         RESCALED_HEIGHT = 500.0
 
         # load the image and compute the ratio of the old height
         # to the new height, clone it, and resize it
-        image = cv2.imread(image_path)
-
+        
         assert(image is not None)
 
         ratio = image.shape[0] / RESCALED_HEIGHT
@@ -284,6 +283,7 @@ class DocScanner(object):
             # save the transformed image
             cv2.imwrite(output_path, warped)
         else:
+            warped = cv2.cvtColor(warped, cv2.COLOR_BGR2RGB)
             return warped
 
 if __name__ == "__main__":

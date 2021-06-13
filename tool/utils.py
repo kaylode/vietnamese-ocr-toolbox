@@ -1,4 +1,5 @@
 import gdown
+import re
 
 def download_weights(id_or_url, cached=None, md5=None, quiet=False):
     if id_or_url.startswith('http'):
@@ -21,3 +22,13 @@ weight_url = {
 def download_pretrained_weights(name, cached=None):
     return download_weights(weight_url[name], cached)
     
+def natural_keys(text):
+    '''
+    alist.sort(key=natural_keys) sorts in human order
+    http://nedbatchelder.com/blog/200712/human_sorting.html
+    (See Toothy's implementation in the comments)
+    '''
+    def atoi(text):
+        return int(text) if text.isdigit() else text
+
+    return [ atoi(c) for c in re.split(r'(\d+)', text) ]

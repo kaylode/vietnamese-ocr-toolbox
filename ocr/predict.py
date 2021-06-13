@@ -1,37 +1,30 @@
 import os
 import re
 from PIL import Image
+import cv2
 import numpy as np
 from ocr.tool.predictor import Predictor
 from ocr.tool.config import Cfg
+from tool.utils import natural_keys
 import argparse
 
-def natural_keys(text):
-    '''
-    alist.sort(key=natural_keys) sorts in human order
-    http://nedbatchelder.com/blog/200712/human_sorting.html
-    (See Toothy's implementation in the comments)
-    '''
-    def atoi(text):
-        return int(text) if text.isdigit() else text
 
-    return [ atoi(c) for c in re.split(r'(\d+)', text) ]
 
 def find_rotation_score(img, detector):
     scores = []
-    t, score = detector.predict(img, return_prob=True)
+    t, score = detector(img, return_prob=True)
     scores.append(score)
+    new_img = img.copy()
     for i in range(3):
-        img = img.transpose(Image.ROTATE_90)
-        t, score = detector.predict(img, return_prob=True)
+        new_img = cv2.rotate(new_img, cv2.ROTATE_90_COUNTERCLOCKWISE)
+        t, score = detector(new_img, return_prob=True)
         scores.append(score)
     return np.array(scores)
 
 def rotate_img(img, orient):
     new_img = img.copy()
     for i in range(orient):
-        new_img = cv2.rotate(new_img, cv2.ROTATE_90_CLOCKWISE)
-    
+        new_img = cv2.rotate(new_img, cv2.ROTATE_90_COUNTERCLOCKWISE)
     return new_img
     
 

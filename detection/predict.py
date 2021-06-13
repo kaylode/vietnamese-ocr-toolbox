@@ -36,7 +36,7 @@ def line_intersection(line1, line2):
     y = det(d, ydiff) / div
     return x, y
 
-def crop_box(img, boxes, image_name, out_folder, num_boxes=0, save_csv=True):
+def crop_box(img, boxes, out_folder, num_boxes=0, save_csv=True):
     h,w,c = img.shape
     sorted_boxes = sort_box(boxes)
 
@@ -72,6 +72,7 @@ def crop_box(img, boxes, image_name, out_folder, num_boxes=0, save_csv=True):
                               [0, th - 1]])
             matrix = cv2.getPerspectiveTransform(pt1,pt2)
             cropped = cv2.warpPerspective(img, matrix, (tw, th)) 
+        if save_csv:
             box_names.append(box_name)
             boxes.append([x1,y1,x2,y2,x3,y3,x4,y4])
         else:
@@ -111,19 +112,20 @@ class PAN:
         self.net.eval()
 
     def predict(self, 
-            img_path: str, 
+            img, 
             output_dir:str =None, 
             short_size: int = 736, 
             crop_region: bool =False, 
             num_boxes: int =0, 
             save_csv: bool = True):
 
-        img = cv2.imread(img_path)
-        ori_img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-
-        h, w = ori_img.shape[:2]
+        """
+            Image needs to be in RGB channel
+        """
+        
+        h, w = img.shape[:2]
         scale = short_size / min(h, w)
-        img = cv2.resize(ori_img, None, fx=scale, fy=scale)
+        img = cv2.resize(img, None, fx=scale, fy=scale)
 
         tensor = tf.ToTensor()(img)
         tensor = tensor.unsqueeze_(0)
@@ -141,10 +143,9 @@ class PAN:
                 boxes_list = boxes_list / scale
             t = time.time() - start
 
-        image_name = os.path.basename(img_path)
         if crop_region:
             os.makedirs(output_dir, exist_ok=True)
-            crop_box(ori_img, boxes_list, image_name, output_dir, num_boxes=num_boxes, save_csv=save_csv)
+            crop_box(img, boxes_list, output_dir, num_boxes=num_boxes, save_csv=save_csv)
         return preds, boxes_list, t
 
 
