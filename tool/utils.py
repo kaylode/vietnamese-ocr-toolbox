@@ -98,8 +98,8 @@ def visualize(
     figsize = width / float(dpi), height / float(dpi)
 
     def find_highest_score_each_class(labels, probs):
-        best_score = [0] * len(class_mapping.keys())
-        best_idx = [-1] * len(class_mapping.keys())
+        best_score = [0] * (len(class_mapping.keys()) -1) # exclude NONE class
+        best_idx = [-1] * (len(class_mapping.keys()) - 1) # exclude NONE class
         for i, (label, prob) in enumerate(zip(labels, probs)):
             label_idx = class_mapping[label]
             if label_idx != class_mapping["NONE"]:
