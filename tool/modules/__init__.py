@@ -47,7 +47,6 @@ class Preprocess:
             _ = self.det_model(
                 output,
                 crop_region=True,
-                save_csv=False,
                 return_result=False,
                 output_path=CACHE_DIR)
 
