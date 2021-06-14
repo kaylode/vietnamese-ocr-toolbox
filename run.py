@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 from tool.modules import Preprocess, Detection, OCR, Retrieval, Correction
 from tool.config import Config 
-from tool.utils import natural_keys, visualize
+from tool.utils import natural_keys, visualize, find_highest_score_each_class
 import time
 
 parser = argparse.ArgumentParser("Document Extraction")
@@ -50,7 +50,8 @@ class Pipeline:
         self.preprocess_cache = os.path.join(self.cache_folder, "preprocessed.jpg")
         self.detection_cache = os.path.join(self.cache_folder, "detected.jpg")
         self.crop_cache = os.path.join(self.cache_folder, 'crops')
-        self.final_output = os.path.join(self.output, 'final.jpg')
+        self.final_output = os.path.join(self.output, 'result.jpg')
+        self.retr_output = os.path.join(self.output, 'result.txt')
 
     def init_modules(self):
         self.det_model = Detection(
@@ -123,6 +124,12 @@ class Pipeline:
           class_mapping = self.class_mapping,
           labels = preds, probs = probs, 
           visualize_best=self.do_retrieve)
+
+        if self.do_retrieve:
+            best_score_idx = find_highest_score_each_class(preds, probs, self.class_mapping)
+            with open(self.retr_output, 'w') as f:
+                for cls, idx in enumerate(best_score_idx):
+                    f.write(f"{self.idx_mapping[cls]} : {texts[idx]}\n")
 
 
 if __name__ == '__main__':

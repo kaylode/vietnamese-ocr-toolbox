@@ -80,6 +80,17 @@ def standard_to_bgr(list_color_name):
 
 color_list = standard_to_bgr(STANDARD_COLORS)
 
+def find_highest_score_each_class(labels, probs, class_mapping):
+    best_score = [0] * (len(class_mapping.keys()) -1) # exclude NONE class
+    best_idx = [-1] * (len(class_mapping.keys()) - 1) # exclude NONE class
+    for i, (label, prob) in enumerate(zip(labels, probs)):
+        label_idx = class_mapping[label]
+        if label_idx != class_mapping["NONE"]:
+            if prob > best_score[label_idx]:
+                best_score[label_idx] = prob
+                best_idx[label_idx] = i
+    return best_idx
+
 def visualize(
         img, 
         boxes, 
@@ -101,20 +112,9 @@ def visualize(
     # Determine the figures size in inches to fit your image
     height, width, depth = img.shape
     figsize = width / float(dpi), height / float(dpi)
-
-    def find_highest_score_each_class(labels, probs):
-        best_score = [0] * (len(class_mapping.keys()) -1) # exclude NONE class
-        best_idx = [-1] * (len(class_mapping.keys()) - 1) # exclude NONE class
-        for i, (label, prob) in enumerate(zip(labels, probs)):
-            label_idx = class_mapping[label]
-            if label_idx != class_mapping["NONE"]:
-                if prob > best_score[label_idx]:
-                    best_score[label_idx] = prob
-                    best_idx[label_idx] = i
-        return best_idx
     
     if visualize_best:
-        best_score_idx = find_highest_score_each_class(labels, probs)
+        best_score_idx = find_highest_score_each_class(labels, probs, class_mapping)
     fig,ax = plt.subplots(figsize=figsize)
     
     
