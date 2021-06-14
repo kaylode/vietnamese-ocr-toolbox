@@ -140,5 +140,3 @@ if __name__ == "__main__":
 
     res = list(zip(inputs, [lbl_dict[x] for x in preds], probs))
     print(res)
-    # Clean up
-    del model, model_state

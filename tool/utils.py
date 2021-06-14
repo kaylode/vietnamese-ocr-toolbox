@@ -108,7 +108,8 @@ def visualize(
                     best_idx[label_idx] = i
         return best_idx
     
-    best_score_idx = find_highest_score_each_class(labels, probs)
+    if visualize_best:
+        best_score_idx = find_highest_score_each_class(labels, probs)
     fig,ax = plt.subplots(figsize=figsize)
     
     
@@ -116,15 +117,22 @@ def visualize(
     img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
     for i, (box,text,label,prob) in enumerate(zip(boxes,texts,labels,probs)):
         label_idx = class_mapping[label]
-        color = color_list[label_idx]
         (x1,y1),(x2,y2),(x3,y3),(x4,y4) = box
         box = np.array([(x1,y1),(x2,y2),(x3,y3),(x4,y4)])
-        img = draw_bbox(img, [box], color=color)
         score = np.round(float(prob), 3)
 
-        if i in best_score_idx:
-            plt_text = f'{text}: {label} | {score}'
+        if visualize_best:
+            color = color_list[label_idx]
+            img = draw_bbox(img, [box], color=color)
+            if i in best_score_idx:
+                plt_text = f'{text}: {label} | {score}'
+                plt.text(x1, y1-3, plt_text, color = [i/255 for i in color][::-1], fontsize=10, weight="bold")
+        else:
+            color = color_list[0]
+            img = draw_bbox(img, [box], color=color)
+            plt_text = f'{text}'
             plt.text(x1, y1-3, plt_text, color = [i/255 for i in color][::-1], fontsize=10, weight="bold")
+
 
     # Display the image
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
