@@ -12,6 +12,7 @@ from preprocess import DocScanner
 import detection
 import ocr
 import retrieval
+import correction
 from tool.config import Config 
 from tool.utils import download_pretrained_weights
 
@@ -164,10 +165,11 @@ class OCR:
             return texts
 
 class Retrieval:
-    def __init__(self, class_mapping, mode="all", bert_weight=None):
+    def __init__(self, class_mapping, dictionary=None, mode="all", bert_weight=None):
         assert mode in ["all", "bert", "trie", "ed"], "Mode is not supported"
         self.mode = mode
 
+        self.dictionary = dictionary
         self.class_mapping = class_mapping
         self.idx_mapping = {v:k for k,v in class_mapping.items()}
 
@@ -188,7 +190,14 @@ class Retrieval:
             self.ed = retrieval.get_heuristic_retrieval('diff')
         if self.use_trie:
             self.trie = retrieval.get_heuristic_retrieval('trie')
-    
+
+        if self.use_ed or self.use_trie:
+            if self.dictionary is None:
+                self.dictionary = {}
+                df = pd.read_csv('./retrieval/heuristic/custom-dictionary.csv')
+                for id, row in df.iterrows():
+                    self.dictionary[row.text.lower()] = row.lbl
+
     def ensemble(self, df):
         preds = []
         probs = []
@@ -219,18 +228,18 @@ class Retrieval:
 
         return preds, probs
 
-    def __call__(self, query_texts, dictionary=None):
+    def __call__(self, query_texts):
         df = pd.DataFrame()
         if self.use_bert:
             preds, probs = self.bert(query_texts)
             df["bert_labels"] = preds
             df["bert_probs"] = probs
         if self.use_ed:
-            preds, probs = self.ed(query_texts, dictionary)
+            preds, probs = self.ed(query_texts, self.dictionary)
             df["diff_labels"] = [self.idx_mapping[x] for x in preds]
             df["diff_probs"] = probs
         if self.use_trie:
-            preds, probs = self.trie(query_texts, dictionary)
+            preds, probs = self.trie(query_texts, self.dictionary)
             df["trie_labels"] = [self.idx_mapping[x] for x in preds]
             df["trie_probs"] = probs
 
@@ -240,3 +249,34 @@ class Retrieval:
         return preds, probs
 
         
+class Correction:
+    def __init__(self, dictionary=None, mode="ed"):
+        assert mode in ["trie", "ed"], "Mode is not supported"
+        self.mode = mode
+        self.dictionary = dictionary
+        if self.mode == 'trie':
+            self.use_trie = True
+        if self.mode == 'ed':
+            self.use_ed = True
+        
+        if self.use_ed:
+            self.ed = correction.get_heuristic_correction('diff')
+        if self.use_trie:
+            self.trie = correction.get_heuristic_correction('trie')
+        
+        if self.use_ed or self.use_trie:
+            if self.dictionary is None:
+                self.dictionary = {}
+                df = pd.read_csv('./retrieval/heuristic/custom-dictionary.csv')
+                for id, row in df.iterrows():
+                    self.dictionary[row.text.lower()] = row.lbl
+
+    def __call__(self, query_texts):
+        if self.use_ed:
+            preds, score = self.ed(query_texts, self.dictionary)
+            
+        if self.use_trie:
+            preds, score = self.trie(query_texts, self.dictionary)
+            
+        return preds, score
+    
