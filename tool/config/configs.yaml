@@ -1,0 +1,26 @@
+#################   DETECTION CONFIG   ###################
+
+det_weight: ""
+det_config: ""
+
+#################   OCR CONFIG   ###################
+
+ocr_weight: ""
+ocr_config: ""
+
+#################   RETRIEVAL CONFIG   ###################
+
+retr_mode: "all"
+correction_mode: "ed"
+bert_weight: ""
+dictionary_csv: "./retrieval/heuristic/custom-dictionary.csv"
+retr_classes: [
+  "SELLER",
+  "ADDRESS",
+  "TIMESTAMP",
+  "TOTAL_COST",
+  "NONE"
+]
+
+#################   TRAINING CONFIG   ###################
+

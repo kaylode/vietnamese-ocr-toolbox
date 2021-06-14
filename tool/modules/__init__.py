@@ -254,6 +254,10 @@ class Correction:
         assert mode in ["trie", "ed"], "Mode is not supported"
         self.mode = mode
         self.dictionary = dictionary
+
+        self.use_trie = False
+        self.use_ed = False
+
         if self.mode == 'trie':
             self.use_trie = True
         if self.mode == 'ed':
@@ -271,12 +275,14 @@ class Correction:
                 for id, row in df.iterrows():
                     self.dictionary[row.text.lower()] = row.lbl
 
-    def __call__(self, query_texts):
+    def __call__(self, query_texts, return_score=False):
         if self.use_ed:
             preds, score = self.ed(query_texts, self.dictionary)
             
         if self.use_trie:
             preds, score = self.trie(query_texts, self.dictionary)
-            
-        return preds, score
-    
+        
+        if return_score:
+            return preds, score
+        else:
+            return preds

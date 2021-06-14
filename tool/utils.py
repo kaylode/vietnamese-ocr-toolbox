@@ -88,7 +88,7 @@ def visualize(
         probs, 
         img_name, 
         class_mapping,
-        visualize_best=True):
+        visualize_best=False):
 
     """
     Visualize an image with its bouding boxes
