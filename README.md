@@ -1,4 +1,4 @@
-# Vietnamese Receipt Reader 
+# Pipeline for Vietnamese OCR
 
 ## Pipeline
 
@@ -21,25 +21,6 @@
 ## Inference
 - Install dependencies
 ```pip install -r requirements.txt```
-
-- Download pretrained model above
-- Scan receipt in image:
-```
-cd preprocess
-python scan.py --image=<path to image> --output=<output folder>
-```
-
-- Detect texts and crop regions from extracted image above:
-```
-cd detection
-python predict.py -i=<input filename> -o=<output folder> -w=<model's checkpoint>
-```
-
-- Extract text from text regions above:
-```
-cd ocr
-python predict.py -i=<input folder> -o=<output txt> -w=<ocr model's checkpoint> -c=<ocr model's config>
-```
 
 - Full pipeline:
 ```
