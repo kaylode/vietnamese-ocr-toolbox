@@ -19,7 +19,9 @@ weight_url = {
     "pan_resnet18_default": "1GKs-NnezTc6WN0P_Zw7h6wYzRRZdJFKl" ,
     "pan_resnet18_sroie19": "12iWFHA0fAys2n6RyhTwNKojwe_ZyEkns" ,
     "transformerocr_mcocr": "1qpXp_-digz2HPTGY_GPdwstzGLhjC_ot",
-    "transformerocr_default": "1aNp_vqeWRTakwQyp0ZD_1ZBZrA5cRK7d",
+    "transformerocr_default_vgg": "13327Y1tz1ohsm5YZMyXVMPIOjoOA0OaA",
+    "transformerocr_default_resnet50": "12dTOZ9VP7ZVzwQgVvqBWz5JO5RXXW5NY",
+    "transformerocr_default_resnet50_fpn": "12dTOZ9VP7ZVzwQgVvqBWz5JO5RXXW5NY",
     "transformerocr_config": "1xQqR9swWNCTLEa0ensPDT0HDBHTke3xT",
     "phobert_mcocr": "1v4GQPg4Jx5FWvqJ-2k9YCxEd6iFdlXXa"
 }

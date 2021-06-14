@@ -21,7 +21,9 @@ CACHE_DIR = '.cache'
 class Preprocess:
     def __init__(
         self, 
-        find_best_rotation=True):
+        find_best_rotation=True,
+        det_model=None,
+        ocr_model=None):
         
         self.find_best_rotation = find_best_rotation
 
@@ -30,8 +32,8 @@ class Preprocess:
             if os.path.exists(self.crop_path):
                 shutil.rmtree(self.crop_path)
                 os.mkdir(self.crop_path)
-            self.det_model = Detection()
-            self.ocr_model = OCR()
+            self.det_model = det_model if det_model is not None else Detection()
+            self.ocr_model = ocr_model if ocr_model is not None else OCR()
         self.scanner = DocScanner()
 
     def __call__(self, image, return_score=False):
@@ -69,13 +71,16 @@ class Preprocess:
             return output
 
 class Detection:
-    def __init__(self, config_path=None, weight_path=None):
+    def __init__(self, config_path=None, weight_path=None, model_name=None):
         if config_path is None:
             config_path = 'tool/config/detection/configs.yaml'
         config = Config(config_path)
+        self.model_name = model_name
         if weight_path is None:
+            if self.model_name is None:
+                self.model_name = "pan_resnet18_default"
             tmp_path = os.path.join(CACHE_DIR, 'det_weight.pth')
-            download_pretrained_weights("pan_resnet18_sroie19", cached=tmp_path)
+            download_pretrained_weights(self.model_name, cached=tmp_path)
             weight_path = tmp_path
         self.model = detection.PAN(config, model_path=weight_path)
         
@@ -115,7 +120,7 @@ class Detection:
             return boxes_list
 
 class OCR:
-    def __init__(self, config_path=None, weight_path=None):
+    def __init__(self, config_path=None, weight_path=None, model_name=None):
         if config_path is None:
             config_path = 'tool/config/ocr/configs.yaml'
         config = Config(config_path)
@@ -124,9 +129,12 @@ class OCR:
         ocr_config['device'] = 'cuda:0'
         ocr_config['predictor']['beamsearch']=False
 
+        self.model_name = model_name
         if weight_path is None:
+            if self.model_name is None:
+                self.model_name = "transformerocr_default_vgg"
             tmp_path = os.path.join(CACHE_DIR, 'ocr_weight.pth')
-            download_pretrained_weights("transformerocr_mcocr", cached=tmp_path)
+            download_pretrained_weights(self.model_name, cached=tmp_path)
             weight_path = tmp_path
         ocr_config['weights'] = weight_path
         self.model = ocr.Predictor(ocr_config)
