@@ -46,7 +46,7 @@ class Pipeline:
 
     def make_cache_folder(self):
         self.cache_folder = os.path.join(args.output, 'cache')
-        os.makedirs(self.cache,exist_ok=True)
+        os.makedirs(self.cache_folder,exist_ok=True)
         self.preprocess_cache = os.path.join(self.cache_folder, "preprocessed.jpg")
         self.detection_cache = os.path.join(self.cache_folder, "detected.jpg")
         self.crop_cache = os.path.join(self.cache_folder, 'crops')
@@ -85,16 +85,30 @@ class Pipeline:
 
     def start(self, img):
         # Document extraction
-        img1 = preproc(img)
-        boxes, img2  = self.det_model(
-            img1,
-            crop_region=True,
-            return_result=self.debug,
-            output_path=self.cache_folder)
+        img1 = self.preproc(img)
+
+        if self.debug:
+            saved_img = cv2.cvtColor(img1, cv2.COLOR_RGB2BGR)
+            cv2.imwrite(self.preprocess_cache, saved_img)
+
+            boxes, img2  = self.det_model(
+                img1,
+                crop_region=True,
+                return_result=True,
+                output_path=self.cache_folder)
+            saved_img = cv2.cvtColor(img2, cv2.COLOR_RGB2BGR)
+            cv2.imwrite(self.detection_cache, saved_img)
+        else:
+            boxes = self.det_model(
+                img1,
+                crop_region=True,
+                return_result=False,
+                output_path=self.cache_folder)
 
         img_paths=os.listdir(self.crop_cache)
         img_paths.sort(key=natural_keys)
         img_paths = [os.path.join(self.crop_cache, i) for i in img_paths]
+        
         texts = self.ocr_model.predict_folder(img_paths, return_probs=False)
         texts = self.correction(texts, return_score=False)
         
@@ -104,14 +118,15 @@ class Pipeline:
             preds, probs = None, None
 
         visualize(
-            img1, boxes, texts, preds, probs, 
-            self.final_output, 
-            class_mapping=self.class_mapping, 
-            visualize_best=self.do_retrieve)
+          img1, boxes, texts, 
+          img_name = self.final_output, 
+          class_mapping = self.class_mapping,
+          labels = preds, probs = probs, 
+          visualize_best=self.do_retrieve)
 
 
 if __name__ == '__main__':
-    config = Config('./configs.yaml')
+    config = Config('./tool/config/configs.yaml')
     pipeline = Pipeline(args, config)
     img = cv2.imread(args.input)
     start_time = time.time()

@@ -17,7 +17,7 @@ def download_weights(id_or_url, cached=None, md5=None, quiet=False):
 
 weight_url = {
     "pan_resnet18_default": "1GKs-NnezTc6WN0P_Zw7h6wYzRRZdJFKl" ,
-    "pan_resnet18_sroie19": "12iWFHA0fAys2n6RyhTwNKojwe_ZyEkns" ,
+    "pan_resnet18_sroie19": "1-QvIN0MrP28URQILYvLaF1G1eTx2oh8W" ,
     "transformerocr_mcocr": "1qpXp_-digz2HPTGY_GPdwstzGLhjC_ot",
     "transformerocr_default_vgg": "13327Y1tz1ohsm5YZMyXVMPIOjoOA0OaA",
     "transformerocr_default_resnet50": "12dTOZ9VP7ZVzwQgVvqBWz5JO5RXXW5NY",
@@ -84,16 +84,19 @@ def visualize(
         img, 
         boxes, 
         texts, 
-        labels, 
-        probs, 
         img_name, 
         class_mapping,
+        labels = None, 
+        probs = None, 
         visualize_best=False):
 
     """
     Visualize an image with its bouding boxes
     """
     
+    if visualize_best:
+        assert labels is not None and probs is not None, "To visualize best, please provide labels and probs"
+
     dpi = matplotlib.rcParams['figure.dpi']
     # Determine the figures size in inches to fit your image
     height, width, depth = img.shape
@@ -117,11 +120,20 @@ def visualize(
     
     # Create a Rectangle patch
     img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-    for i, (box,text,label,prob) in enumerate(zip(boxes,texts,labels,probs)):
-        label_idx = class_mapping[label]
+    for i in range(len(boxes)):
+        
+        box = boxes[i]
+        text = texts[i]
+
+        if labels is not None:
+            label = labels[i]
+            label_idx = class_mapping[label]    
+        if probs is not None:
+            prob = probs[i]
+            score = np.round(float(prob), 3)
+        
         (x1,y1),(x2,y2),(x3,y3),(x4,y4) = box
         box = np.array([(x1,y1),(x2,y2),(x3,y3),(x4,y4)])
-        score = np.round(float(prob), 3)
 
         if visualize_best:
             color = color_list[label_idx]
