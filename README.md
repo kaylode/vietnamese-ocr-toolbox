@@ -2,7 +2,7 @@
 
 ## Pipeline
 
-![Alt Text](fullpipeline.PNG)
+![Alt Text](demo/fullpipeline.PNG)
 
 1. Use Canny Edge Detector and then detect contours.
 2. Extract receipt from image and normalize.
