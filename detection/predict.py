@@ -15,7 +15,13 @@ def sort_box(boxes):
     sorted_boxes = []
     for box in boxes:
         sorted_boxes.append(order_points_clockwise(box))
-    mid_points = [line_intersection((box[0],box[2]), (box[1], box[3])) for box in sorted_boxes]
+    mid_points = []
+    for box in sorted_boxes:
+        try:
+            mid = line_intersection((box[0],box[2]), (box[1], box[3]))
+            mid_points.append(mid)
+        except:
+            continue
     sorted_indices = np.argsort(mid_points, axis=0)
     sorted_boxes = sorted(sorted_boxes , key=lambda sorted_indices: [sorted_indices[0][1], sorted_indices[0][0]]) 
     return sorted_boxes
