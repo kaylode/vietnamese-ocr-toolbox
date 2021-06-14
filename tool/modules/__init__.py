@@ -80,7 +80,7 @@ class Detection:
         if weight_path is None:
             if self.model_name is None:
                 self.model_name = "pan_resnet18_default"
-            tmp_path = os.path.join(CACHE_DIR, 'det_weight.pth')
+            tmp_path = os.path.join(CACHE_DIR, f'{self.model_name}.pth')
             download_pretrained_weights(self.model_name, cached=tmp_path)
             weight_path = tmp_path
         self.model = detection.PAN(config, model_path=weight_path)
@@ -134,7 +134,7 @@ class OCR:
         if weight_path is None:
             if self.model_name is None:
                 self.model_name = "transformerocr_default_vgg"
-            tmp_path = os.path.join(CACHE_DIR, 'ocr_weight.pth')
+            tmp_path = os.path.join(CACHE_DIR, f'{self.model_name}.pth')
             download_pretrained_weights(self.model_name, cached=tmp_path)
             weight_path = tmp_path
         ocr_config['weights'] = weight_path
@@ -156,7 +156,7 @@ class OCR:
                 texts.append(text)
                 probs.append(prob)
             else:
-                text = self.model(img, False)
+                text = self(img, False)
                 texts.append(text)
 
         if return_probs:

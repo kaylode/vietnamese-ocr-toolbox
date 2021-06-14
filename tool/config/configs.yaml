@@ -1,12 +1,12 @@
 #################   DETECTION CONFIG   ###################
 
-det_weight: ""
-det_config: ""
+det_weight: "/content/drive/MyDrive/AI Competitions/MC-OCR/checkpoints/detection-checkpoints/best_rotation/PANNet_best_map.pth"
+det_config: "./tool/config/detection/configs.yaml"
 
 #################   OCR CONFIG   ###################
 
-ocr_weight: ""
-ocr_config: ""
+ocr_weight: "/content/drive/MyDrive/AI Competitions/MC-OCR/checkpoints/ocr-checkpoints/transformerocr.pth"
+ocr_config: "./tool/config/ocr/configs.yaml"
 
 #################   RETRIEVAL CONFIG   ###################
 
