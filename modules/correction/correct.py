@@ -1,4 +1,4 @@
-from retrieval.heuristic.heuristic import Matcher
+from modules.retrieval.heuristic.heuristic import Matcher
 import difflib
 import re
 import math

@@ -1,17 +1,17 @@
 import torch
 from torch import nn
 
-import ocr.model.backbone.vgg as vgg
-from ocr.model.backbone.resnet import Resnet50
+from .vgg import vgg11_bn, vgg19_bn
+from .resnet import Resnet50
 
 class CNN(nn.Module):
     def __init__(self, backbone, **kwargs):
         super(CNN, self).__init__()
 
         if backbone == 'vgg11_bn':
-            self.model = vgg.vgg11_bn(**kwargs)
+            self.model = vgg11_bn(**kwargs)
         elif backbone == 'vgg19_bn':
-            self.model = vgg.vgg19_bn(**kwargs)
+            self.model = vgg19_bn(**kwargs)
         elif backbone == 'resnet50':
             self.model = Resnet50(**kwargs)
 

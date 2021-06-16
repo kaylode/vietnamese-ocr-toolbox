@@ -5,7 +5,7 @@ import numpy as np
 import webcolors
 import matplotlib
 import matplotlib.pyplot as plt
-from detection import draw_bbox
+from modules.detection import draw_bbox
 def download_weights(id_or_url, cached=None, md5=None, quiet=False):
     if id_or_url.startswith('http'):
         url = id_or_url

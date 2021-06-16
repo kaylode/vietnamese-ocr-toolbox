@@ -4,9 +4,9 @@ import math
 from PIL import Image
 from torch.nn.functional import log_softmax, softmax
 
-from ocr.model.transformerocr import VietOCR
-from ocr.model.vocab import Vocab
-from ocr.model.beam import Beam
+from modules.ocr.model.transformerocr import VietOCR
+from modules.ocr.model.vocab import Vocab
+from modules.ocr.model.beam import Beam
 
 def batch_translate_beam_search(img, model, beam_size=4, candidates=1, max_seq_length=128, sos_token=1, eos_token=2):
     # img: NxCxHxW

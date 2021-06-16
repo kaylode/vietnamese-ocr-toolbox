@@ -3,8 +3,8 @@ import re
 from PIL import Image
 import cv2
 import numpy as np
-from ocr.tool.predictor import Predictor
-from ocr.tool.config import Cfg
+from .tool.predictor import Predictor
+from .tool.config import Cfg
 from tool.utils import natural_keys
 import argparse
 

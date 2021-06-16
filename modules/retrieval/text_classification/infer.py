@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from tool.utils import download_pretrained_weights
-sys.path.append("./retrieval/text_classification/libs/")
+sys.path.append("./modules/retrieval/text_classification/libs/")
 
 from customdatasets import MCOCRDataset
 from torch.utils.data import DataLoader

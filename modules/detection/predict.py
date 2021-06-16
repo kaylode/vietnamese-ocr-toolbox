@@ -5,10 +5,10 @@ import cv2
 import time
 import numpy as np
 import pandas as pd
-from detection.models import get_model
+from .models import get_model
 from tool.config import Config
-from detection.utils.util import order_points_clockwise
-from detection.post_processing import decode_clip
+from .utils.util import order_points_clockwise
+from .post_processing import decode_clip
 import argparse
 
 def sort_box(boxes):
