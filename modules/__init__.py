@@ -193,7 +193,7 @@ class Retrieval:
         if self.use_ed or self.use_trie:
             if self.dictionary is None:
                 self.dictionary = {}
-                df = pd.read_csv('./retrieval/heuristic/custom-dictionary.csv')
+                df = pd.read_csv('./modules/retrieval/heuristic/custom-dictionary.csv')
                 for id, row in df.iterrows():
                     self.dictionary[row.text.lower()] = row.lbl
 
@@ -270,7 +270,7 @@ class Correction:
         if self.use_ed or self.use_trie:
             if self.dictionary is None:
                 self.dictionary = {}
-                df = pd.read_csv('./retrieval/heuristic/custom-dictionary.csv')
+                df = pd.read_csv('./modules/retrieval/heuristic/custom-dictionary.csv')
                 for id, row in df.iterrows():
                     self.dictionary[row.text.lower()] = row.lbl
 

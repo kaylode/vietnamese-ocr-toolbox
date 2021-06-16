@@ -13,7 +13,7 @@ ocr_config: "./tool/config/ocr/configs.yaml"
 retr_mode: "all"
 correction_mode: "ed"
 bert_weight: "/content/drive/MyDrive/AI Competitions/MC-OCR/checkpoints/retrieval-checkpoints/phobert_report.pth"
-dictionary_csv: "./retrieval/heuristic/custom-dictionary.csv"
+dictionary_csv: "./modules/retrieval/heuristic/custom-dictionary.csv"
 retr_classes: [
   "SELLER",
   "ADDRESS",
