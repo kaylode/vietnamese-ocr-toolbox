@@ -7,7 +7,7 @@
   val_anns: annotations/val.json
   #################   TRAINING CONFIG   ###################
   
-  pretrained: "/content/drive/MyDrive/weights/pretrained/PANNet/PAN_resnet18_FPEM_FFM.pth"
+  pretrained: "./weights/PAN_resnet18_FPEM_FFM.pth"
 
   gpu_devices: '0'                     # supports multi-gpus
   num_epochs: 100

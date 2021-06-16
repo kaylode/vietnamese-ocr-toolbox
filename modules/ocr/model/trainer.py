@@ -39,6 +39,7 @@ class Trainer():
         self.train_annotation = config['dataset']['train_annotation']
         self.valid_annotation = config['dataset']['valid_annotation']
         self.dataset_name = config['dataset']['name']
+        self.dataset_export = config['dataset']['export']
 
         self.batch_size = config['trainer']['batch_size']
         self.print_every = config['trainer']['print_every']
@@ -75,10 +76,10 @@ class Trainer():
         if self.image_aug:
             transforms =  augmentor
 
-        self.train_gen = self.data_gen('train_{}'.format(self.dataset_name), 
+        self.train_gen = self.data_gen(os.path.join(self.dataset_export, 'train_{}'.format(self.dataset_name)), 
                 self.data_root, self.train_annotation, self.masked_language_model, transform=transforms)
         if self.valid_annotation:
-            self.valid_gen = self.data_gen('valid_{}'.format(self.dataset_name), 
+            self.valid_gen = self.data_gen(os.path.join(self.dataset_export, 'valid_{}'.format(self.dataset_name)), 
                     self.data_root, self.valid_annotation, masked_language_model=False)
 
         self.train_losses = []

@@ -1,18 +1,18 @@
 #################   DETECTION CONFIG   ###################
 
-det_weight: "/content/drive/MyDrive/AI Competitions/MC-OCR/checkpoints/detection-checkpoints/best_rotation/PANNet_best_map.pth"
+det_weight: "./weights/PANNet_best_map.pth"
 det_config: "./tool/config/detection/configs.yaml"
 
 #################   OCR CONFIG   ###################
 
-ocr_weight: "/content/drive/MyDrive/AI Competitions/MC-OCR/checkpoints/ocr-checkpoints/transformerocr.pth"
+ocr_weight: "./weights/transformerocr.pth"
 ocr_config: "./tool/config/ocr/configs.yaml"
 
 #################   RETRIEVAL CONFIG   ###################
 
 retr_mode: "all"
 correction_mode: "ed"
-bert_weight: "/content/drive/MyDrive/AI Competitions/MC-OCR/checkpoints/retrieval-checkpoints/phobert_report.pth"
+bert_weight: "./weights/phobert_report.pth"
 dictionary_csv: "./modules/retrieval/heuristic/custom-dictionary.csv"
 retr_classes: [
   "SELLER",
@@ -21,6 +21,3 @@ retr_classes: [
   "TOTAL_COST",
   "NONE"
 ]
-
-#################   TRAINING CONFIG   ###################
-

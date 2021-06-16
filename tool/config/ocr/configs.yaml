@@ -5,6 +5,7 @@ project_name: "mcocr"
 data_root: "data/ocr_data/"
 train_annotation: "train_annotation.txt"
 valid_annotation: "val_annotation.txt"
+data_export: "./data"
 
 print_every: 100
 valid_every: 500
