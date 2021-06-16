@@ -1,24 +1,24 @@
-from optim.optim import ScheduledOptim
-from optim.labelsmoothingloss import LabelSmoothingLoss
+from ..optim.optim import ScheduledOptim
+from ..optim.labelsmoothingloss import LabelSmoothingLoss
 from torch.optim import Adam, SGD, AdamW
 from torch import nn
-from tool.translate import build_model
-from tool.translate import translate, batch_translate_beam_search
-from tool.utils import download_weights
-from tool.logger import Logger
-from loader.aug import ImgAugTransform
+from ..tool.translate import build_model
+from ..tool.translate import translate, batch_translate_beam_search
+from ..tool.utils import download_weights
+from ..tool.logger import Logger
+from ..loader.aug import ImgAugTransform
 
 import yaml
 import torch
-from loader.dataloader_v1 import DataGen
-from loader.dataloader import OCRDataset, ClusterRandomSampler, Collator
+from ..loader.dataloader_v1 import DataGen
+from ..loader.dataloader import OCRDataset, ClusterRandomSampler, Collator
 from torch.utils.data import DataLoader
 from einops import rearrange
 from torch.optim.lr_scheduler import CosineAnnealingLR, CyclicLR, OneCycleLR
 
 import torchvision 
 
-from tool.utils import compute_accuracy
+from ..tool.utils import compute_accuracy
 from PIL import Image
 import numpy as np
 import os

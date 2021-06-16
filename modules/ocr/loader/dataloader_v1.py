@@ -2,8 +2,8 @@ import torch
 import numpy as np
 from PIL import Image
 import random
-from model.vocab import Vocab
-from tool.translate import process_image
+from ..model.vocab import Vocab
+from ..tool.translate import process_image
 import os
 from collections import defaultdict
 import math

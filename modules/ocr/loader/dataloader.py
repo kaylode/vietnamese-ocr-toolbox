@@ -15,9 +15,9 @@ from tqdm import tqdm
 
 from torch.utils.data import Dataset
 from torch.utils.data.sampler import Sampler
-from tool.translate import process_image
-from tool.create_dataset import createDataset
-from tool.translate import resize
+from ..tool.translate import process_image
+from ..tool.create_dataset import createDataset
+from ..tool.translate import resize
 
 class OCRDataset(Dataset):
     def __init__(self, lmdb_path, root_dir, annotation_path, vocab, image_height=32, image_min_width=32, image_max_width=512, transform=None):
