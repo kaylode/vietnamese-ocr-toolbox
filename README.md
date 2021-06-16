@@ -2,6 +2,21 @@
 This toolbox provides a pipeline to do OCR in Vietnamese documents (such as receipts, personal id, licenses,...). 
 The project also support flexibility for adaptation.
 
+<div align="center"> Invoice (from SROIE19 dataset)</div>
+
+![Alt text](demo/invoice/fullpipeline.PNG)
+
+<div align="center">Personal ID (image from internet)</div>
+
+![Alt text](demo/ekyc/fullpipeline_cmnd.PNG)
+
+Pipeline in detail:
+1. Use Canny Edge Detector and then detect contours.
+2. Extract receipt from image and normalize.
+3. Use Pixel Agreation Network (PAN) to detect text regions from extracted receipt, then crop these regions.
+4. Use VietOCR to extract texts from regions, then perform word correction.
+5. Retrieve information
+
 ## **Notebooks**
 - Notebook for training PAN: [![Notebook](https://colab.research.google.com/assets/colab-badge.svg)](./demo/notebooks/[vnm_ocr_toolbox]_Train_PAN_for_Text_Detection.ipynb)
 - Notebook for training VietOCR: [![Notebook](https://colab.research.google.com/assets/colab-badge.svg)](./demo/notebooks/[vnm_ocr_toolbox]_Train_PAN_for_Text_Detection.ipynb)
@@ -65,24 +80,6 @@ python run.py --input=<input image> --output=<output folder>
     - ***--debug***:              whether to save output of each step
     - ***--find_best_rotation***: whether to find best rotation first
     - ***--do_retrieve***:        whether to retrieve information (based on class defined in config) or ocr only
-    
-## **Results**
-
-<div align="center"> Invoice (from SROIE19 dataset)</div>
-
-![Alt text](demo/invoice/fullpipeline.PNG)
-
-<div align="center">Personal ID (image from internet)</div>
-
-![Alt text](demo/ekyc/fullpipeline_cmnd.PNG)
-
-Pipeline in detail:
-1. Use Canny Edge Detector and then detect contours.
-2. Extract receipt from image and normalize.
-3. Use Pixel Agreation Network (PAN) to detect text regions from extracted receipt, then crop these regions.
-4. Use VietOCR to extract texts from regions, then perform word correction.
-5. Retrieve information
-
 
 ## References
 - https://github.com/WenmuZhou/PAN.pytorch
