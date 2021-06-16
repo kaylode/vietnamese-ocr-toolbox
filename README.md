@@ -1,4 +1,4 @@
-# Pipeline for Vietnamese OCR
+# Vietnamese OCR Toolbox
 
 ## Pipeline
 
