@@ -3,6 +3,8 @@
  <a href=""><img src="https://img.shields.io/badge/python-3.7+-aff.svg"></a>
 </p>
 
+[![CodeFactor](https://www.codefactor.io/repository/github/kaylode/vnm-ocr-toolbox/badge)](https://www.codefactor.io/repository/github/kaylode/vnm-ocr-toolbox)
+
 This toolbox provides a pipeline to do OCR in Vietnamese documents (such as receipts, personal id, licenses,...). 
 The project also support flexibility for adaptation.
 
@@ -23,10 +25,10 @@ The project also support flexibility for adaptation.
 5. Retrieve information
 
 ## **Notebooks**
-- Notebook for training PAN: [![Notebook](https://colab.research.google.com/assets/colab-badge.svg)](./demo/notebooks/[vnm_ocr_toolbox]_Train_PAN_for_Text_Detection.ipynb)
-- Notebook for training VietOCR: [![Notebook](https://colab.research.google.com/assets/colab-badge.svg)](./demo/notebooks/[vnm_ocr_toolbox]_Train_PAN_for_Text_Detection.ipynb)
-- Notebook for training PhoBERT: [![Notebook](https://colab.research.google.com/assets/colab-badge.svg)](./demo/notebooks/[vnm_ocr_toolbox]_Train_OCR.ipynb)
-- Notebook for inference: [![Notebook](https://colab.research.google.com/assets/colab-badge.svg)](./demo/notebooks/[vnm_ocr_toolbox]_Inference.ipynb)
+- Notebook for training PAN: [![Notebook](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/kaylode/vnm-ocr-toolbox/blob/master/demo/notebooks/[vnm_ocr_toolbox]_Train_PAN_for_Text_Detection.ipynb)
+- Notebook for training VietOCR: [![Notebook](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/kaylode/vnm-ocr-toolbox/blob/master/demo/notebooks/[vnm_ocr_toolbox]_Train_PAN_for_Text_Detection.ipynb)
+- Notebook for training PhoBERT: [![Notebook](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/kaylode/vnm-ocr-toolbox/blob/master/demo/notebooks/[vnm_ocr_toolbox]_Train_OCR.ipynb)
+- Notebook for inference: [![Notebook](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/kaylode/vnm-ocr-toolbox/blob/master/demo/notebooks/[vnm_ocr_toolbox]_Inference.ipynb)
 
 
 ## **Pipeline**
