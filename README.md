@@ -11,7 +11,12 @@ The project also support flexibility for adaptation.
 
 ## **Pipeline**
 
+<div align="center"> Main Pipeline</div>
+
 ![Alt Text](demo/pipeline1.png)
+
+<div align="center"> Process Flow Block</div>
+
 ![Alt Text](demo/pipeline2.png)
 
 There are two stages (can also run in second stage only):
