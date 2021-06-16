@@ -88,7 +88,7 @@ class mAPScores():
                     img_path = self._get_image(img_id)
                     img = cv2.imread(img_path)
                     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-                    _, boxes_list, _ = self.model.predict(img_path)
+                    _, boxes_list, _ = self.model.predict(img)
 
                     boxes = []
                     labels = []
