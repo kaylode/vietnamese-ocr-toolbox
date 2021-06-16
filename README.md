@@ -1,4 +1,4 @@
-# **A OCR Toolbox for Vietnamese Documents**
+# **An OCR Toolbox for Vietnamese Documents**
 This toolbox provides a pipeline to do OCR in Vietnamese documents (such as receipts, personal id, licenses,...). 
 The project also support flexibility for adaptation.
 
