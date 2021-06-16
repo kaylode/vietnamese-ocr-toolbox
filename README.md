@@ -1,7 +1,12 @@
 # **An OCR Toolbox for Vietnamese Documents**
+<p align="left">
+ <a href=""><img src="https://img.shields.io/badge/python-3.7+-aff.svg"></a>
+</p>
+
 This toolbox provides a pipeline to do OCR in Vietnamese documents (such as receipts, personal id, licenses,...). 
 The project also support flexibility for adaptation.
 
+-------------------------------------------------------------
 <div align="center"> Invoice (from SROIE19 dataset)</div>
 
 ![Alt text](demo/invoice/fullpipeline.PNG)
@@ -10,7 +15,7 @@ The project also support flexibility for adaptation.
 
 ![Alt text](demo/ekyc/fullpipeline_cmnd.PNG)
 
-Pipeline in detail:
+**Pipeline in detail:**
 1. Use Canny Edge Detector and then detect contours.
 2. Extract receipt from image and normalize.
 3. Use Pixel Agreation Network (PAN) to detect text regions from extracted receipt, then crop these regions.
