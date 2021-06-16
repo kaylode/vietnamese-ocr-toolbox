@@ -7,7 +7,7 @@ import pandas as pd
 from PIL import Image
 import matplotlib.pyplot as plt
 import matplotlib
-from tool.modules import Preprocess, Detection, OCR, Retrieval, Correction
+from modules import Preprocess, Detection, OCR, Retrieval, Correction
 from tool.config import Config 
 from tool.utils import natural_keys, visualize, find_highest_score_each_class
 import time

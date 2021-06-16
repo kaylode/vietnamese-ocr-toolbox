@@ -8,11 +8,11 @@ import pandas as pd
 from PIL import Image
 import matplotlib.pyplot as plt
 import matplotlib
-from preprocess import DocScanner
-import detection
-import ocr
-import retrieval
-import correction
+from .preprocess import DocScanner
+import modules.detection as detection
+import modules.ocr as ocr
+import modules.retrieval as retrieval
+import modules.correction as correction
 from tool.config import Config 
 from tool.utils import download_pretrained_weights
 
