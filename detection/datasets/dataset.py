@@ -3,8 +3,8 @@ import cv2
 import numpy as np
 from PIL import Image
 from torch.utils.data import Dataset, DataLoader
-from datasets.data_utils import image_label
-from utils import order_points_clockwise
+from .data_utils import image_label
+from ..utils import order_points_clockwise
 from pycocotools.coco import COCO
 
 class ImageDataset(Dataset):

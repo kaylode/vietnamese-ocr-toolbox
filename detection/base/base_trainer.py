@@ -9,7 +9,7 @@ from pprint import pformat
 import torch
 from torch import nn
 from datetime import datetime
-from utils import setup_logger
+from ..utils import setup_logger
 
 
 class BaseTrainer:

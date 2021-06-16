@@ -6,7 +6,7 @@ import random
 import pyclipper
 import numpy as np
 import cv2
-from datasets.augment import DataAugment
+from .augment import DataAugment
 
 data_aug = DataAugment()
 

@@ -22,6 +22,7 @@ AP@.75 means the AP with IoU=0.75
 """
 
 import os
+import cv2
 import torch
 import json
 import numpy as np
@@ -85,6 +86,8 @@ class mAPScores():
                 for img_id in self.image_ids:
                     
                     img_path = self._get_image(img_id)
+                    img = cv2.imread(img_path)
+                    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
                     _, boxes_list, _ = self.model.predict(img_path)
 
                     boxes = []

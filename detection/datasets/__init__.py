@@ -13,8 +13,8 @@ from . import dataset
 def get_dataloader(config):
 
     trainset = dataset.ImageDataset(
-        images_dir=os.path.join('../data', config.project_name, config.train_imgs),
-        ann_path=os.path.join('../data', config.project_name, config.train_anns),
+        images_dir=os.path.join('./data', config.project_name, config.train_imgs),
+        ann_path=os.path.join('./data', config.project_name, config.train_anns),
         input_size=config.image_size,
         img_channel=3,
         shrink_ratio=0.5,
@@ -23,8 +23,8 @@ def get_dataloader(config):
     )
 
     valset = dataset.ImageDataset(
-        images_dir=os.path.join('../data', config.project_name, config.val_imgs),
-        ann_path=os.path.join('../data', config.project_name, config.val_anns),
+        images_dir=os.path.join('./data', config.project_name, config.val_imgs),
+        ann_path=os.path.join('./data', config.project_name, config.val_anns),
         input_size=736,
         img_channel=3,
         shrink_ratio=1,

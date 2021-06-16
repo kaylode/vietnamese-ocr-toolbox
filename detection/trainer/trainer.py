@@ -11,9 +11,9 @@ from tqdm import tqdm
 import torch
 import torchvision.utils as vutils
 from torchvision import transforms
-from metrics import runningScore, cal_text_score, cal_kernel_score, cal_recall_precison_f1
-from base import BaseTrainer
-from predict import PAN
+from ..metrics import runningScore, cal_text_score, cal_kernel_score, cal_recall_precison_f1
+from ..base import BaseTrainer
+from ..predict import PAN
 
 class Trainer(BaseTrainer):
     def __init__(self, args, config, model, criterion, train_loader, val_loader, metric, weights_init=None):
