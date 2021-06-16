@@ -9,15 +9,15 @@ import os
 from PIL import Image
 
 
-def extract_mcocr(data_dir = "./data/mcocr_public/mcocr_train_data/"):
+def extract_mcocr(data_dir = "./data/mcocr_public/mcocr_train_data/", out_dir="./data/ocr_data/"):
     
     mcocr_root = Path(data_dir)
     mcocr_ims_dir = mcocr_root / "train_images"
     mcocr_csv_path = mcocr_root / "mcocr_train_df.csv"
 
-    ocr_savedir = Path("./ocr_data/img")
+    ocr_savedir = Path(f"{out_dir}/img")
     ocr_savedir.mkdir(parents=True, exist_ok=True)
-    ocr_txt = Path("./ocr_data") / "data.txt"
+    ocr_txt = Path(f"{out_dir}") / "data.txt"
     im_ls = list(mcocr_ims_dir.rglob("*.jpg"))
     df = pd.read_csv(mcocr_csv_path)
     count = 0
