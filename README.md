@@ -26,8 +26,11 @@ The project also support flexibility for adaptation.
 
 ## **Notebooks**
 - Notebook for training PAN: [![Notebook](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/kaylode/vnm-ocr-toolbox/blob/master/demo/notebooks/[vnm_ocr_toolbox]_Train_PAN_for_Text_Detection.ipynb)
-- Notebook for training VietOCR: [![Notebook](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/kaylode/vnm-ocr-toolbox/blob/master/demo/notebooks/[vnm_ocr_toolbox]_Train_PAN_for_Text_Detection.ipynb)
-- Notebook for training PhoBERT: [![Notebook](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/kaylode/vnm-ocr-toolbox/blob/master/demo/notebooks/[vnm_ocr_toolbox]_Train_OCR.ipynb)
+
+- Notebook for training Transformer OCR: [![Notebook](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/kaylode/vnm-ocr-toolbox/blob/master/demo/notebooks/[vnm_ocr_toolbox]_Train_OCR.ipynb)
+
+- Notebook for training PhoBERT: [![Notebook](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/kaylode/vnm-ocr-toolbox/blob/master/demo/notebooks/[vnm_ocr_toolbox]_Train_PhoBERT_for_Text_Classification)
+
 - Notebook for inference: [![Notebook](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/kaylode/vnm-ocr-toolbox/blob/master/demo/notebooks/[vnm_ocr_toolbox]_Inference.ipynb)
 
 
