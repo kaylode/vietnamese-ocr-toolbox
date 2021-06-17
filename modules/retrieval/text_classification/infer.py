@@ -5,8 +5,8 @@ import pandas as pd
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from tool.utils import download_pretrained_weights
-sys.path.append("./modules/retrieval/text_classification/libs/")
+
+sys.path.append("./libs/")
 
 from customdatasets import MCOCRDataset
 from torch.utils.data import DataLoader
@@ -17,7 +17,8 @@ from utils.getter import get_instance
 from string import punctuation
 import re
 
-CACHE_DIR ='.cache'
+CACHE_DIR = ".cache"
+
 
 def clean(s):
     res = re.sub(r"(\w)(\()(\w)", "\g<1> \g<2>\g<3>", s)
@@ -32,11 +33,6 @@ def clean(s):
 def stripclean(arr):
     res = [s.strip().strip(punctuation) for s in arr]
     return " ".join([i for i in res if i != ""])
-
-
-def dummy(x):
-    # stupid workaround to deep copy array cause i couldn't get it to work properly
-    return [s for s in x]
 
 
 class MCOCRDataset_from_list(MCOCRDataset):
@@ -70,7 +66,7 @@ class PhoBERT:
     def __init__(self, idx_mapping, weight_path=None):
         self.idx_mapping = idx_mapping
         if weight_path is None:
-            tmp_path = os.path.join(CACHE_DIR, 'bert_weight.pth')
+            tmp_path = os.path.join(CACHE_DIR, "bert_weight.pth")
             download_pretrained_weights("phobert_mcocr", tmp_path)
             weight_path = tmp_path
         meta_data = torch.load(weight_path)
@@ -79,13 +75,13 @@ class PhoBERT:
 
         self.model = get_instance(self.cfg["model"]).cuda()
         self.model.load_state_dict(model_state)
-    
+
     def __call__(self, texts):
         dataset = MCOCRDataset_from_list(
-            texts, 
-            pretrained_model=self.cfg["model"]["args"]["pretrained_model"], 
+            texts,
+            pretrained_model=self.cfg["model"]["args"]["pretrained_model"],
             max_len=31,
-            preproc=True
+            preproc=True,
         )
 
         dataloader = torch.utils.data.DataLoader(
@@ -94,10 +90,8 @@ class PhoBERT:
 
         with torch.no_grad():
             preds, probs = inference(
-                model=self.model, 
-                dataloader=dataloader, 
-                device=torch.device("cuda:0"))
-
+                model=self.model, dataloader=dataloader, device=torch.device("cuda:0")
+            )
 
         labels = [self.idx_mapping[x] for x in preds]
         return labels, probs

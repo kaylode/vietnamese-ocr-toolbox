@@ -39,7 +39,7 @@ if __name__ == "__main__":
 
     dataset = MCOCRDataset(
         pretrained_model=cfg["model"]["args"]["pretrained_model"],
-        csv_path=f"data/splitted_train_val/val.csv",
+        csv_path=cfg["dataset"]["val"]["args"]["csv_path"],
         is_train=True,
         max_len=31,
     )
