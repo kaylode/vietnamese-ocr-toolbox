@@ -81,7 +81,7 @@ def crop_box(img, boxes, out_folder, sort_box=True):
         except:
             print(box_name, " is missing")
 
-    return sorted_boxes
+    return boxes
 
 class PAN:
     def __init__(self, config, model_path=None, state_dict=None):
