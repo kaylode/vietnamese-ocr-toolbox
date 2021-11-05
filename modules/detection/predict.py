@@ -42,10 +42,10 @@ def line_intersection(line1, line2):
     y = det(d, ydiff) / div
     return x, y
 
-def crop_box(img, boxes, out_folder, sort_box=True):
+def crop_box(img, boxes, out_folder, sort=True):
     h,w,c = img.shape
     
-    if sort_box:
+    if sort:
         boxes = sort_box(boxes)
     
     for i, box in enumerate(boxes):
