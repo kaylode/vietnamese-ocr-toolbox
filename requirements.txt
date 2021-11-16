@@ -14,3 +14,4 @@ torchnet
 gdown==3.13.0
 webcolors
 pandas_profiling
+torchvision==0.10
