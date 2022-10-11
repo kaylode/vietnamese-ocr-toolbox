@@ -53,8 +53,8 @@ There are two stages (can also run in second stage only):
   - The second stage is to forward the rotated image through the entire "process flow" normally to retrieve information
 
 ## **Datasets**
-- [MCOCR-2020](https://drive.google.com/file/d/1cyEGMVcEkquduJp3ewGq9Q4SyliX0bfB/view?usp=sharing) (for detection)
-- [SROIE19](https://drive.google.com/drive/folders/1jdFA0yg8uw15scux8O73qs6c5fr1cUff?usp=sharing) (for ocr and retrieval)
+- [MCOCR-2020](https://drive.google.com/file/d/1bckFiNBMcr2BH1zCJl-MhV9l1AlAmtlQ/view?usp=sharing) (for detection)
+- [SROIE19](https://drive.google.com/file/d/1bJunF1BZvVI5kx-AHCOkQXIKG7q0FkD5/view?usp=sharing) (for ocr and retrieval)
 
 | | | |
 |:-------------------------:|:-------------------------:|:-------------------------:|
